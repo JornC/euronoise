@@ -1,0 +1,57 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
+  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:map="urn:import:nl.yogh.aerius.wui.euronoise.component.map"
+  xmlns:menu="urn:import:nl.yogh.aerius.wui.euronoise.component.menu">
+  <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
+  <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
+  <ui:style>
+    .panel {
+    z-index: 2;
+    background-color: rgba(255,255,255,0.9);
+    border: 1px solid gray;
+    border-top: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    position: absolute;
+    left: 50%;
+    margin-left: -300px;
+    width: 600px;
+    height: 0px;
+    transition: height 0.35s ease-out;
+    overflow: hidden;
+    }
+    .calculatePanel {
+    padding: 20px;
+    }
+    .text {
+    color: #333;
+    }
+    .calculate {
+    background-color: #e1710d;
+    color: white;
+    padding: 10px 20px;
+    outline: 0;
+    float: right;
+    margin-top: 20px;
+    margin-right: 40px;
+    border: 0;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    }
+    .calculate:hover {
+    color: #eee;
+    background-color: #ff7800;
+    }
+    .calculate:active {
+    color: #eee;
+    background-color: #8e4300;
+    }
+  </ui:style>
+  <g:FlowPanel styleName="{style.panel}">
+    <g:FlowPanel styleName="{style.calculatePanel}">
+      <g:Label text="Your scenario 'Westport' with two situations was successfully uploaded." styleName="{style.text}" />
+      <g:Button text="Calculate" styleName="{style.calculate}" ui:field="calculate" />
+    </g:FlowPanel>
+  </g:FlowPanel>
+</ui:UiBinder>

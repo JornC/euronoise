@@ -1,0 +1,43 @@
+/* Font RijksoverheidSansText */
+@font-face {
+    font-family: 'RO-Sans-Text';
+    src: url('fonts/ROsanswebtextregular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'RO-Sans-Text';
+    src: url('fonts/ROsanswebtextitalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'RO-Sans-Text';
+    src: url('fonts/ROsanswebtextbold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+/* Font RijksoverheidSerif */
+@font-face {
+    font-family: 'RO-Serif';
+    src: url('fonts/ROserifwebregular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'RO-Serif';
+    src: url('fonts/ROserifwebitalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'RO-Serif';
+    src: url('fonts/ROserifwebbold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family:'RO-Sans-Heading',Arial, Sans-Serif;
+}
+

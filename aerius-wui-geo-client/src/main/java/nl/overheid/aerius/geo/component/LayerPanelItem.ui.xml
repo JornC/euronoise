@@ -1,0 +1,44 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:e="urn:import:nl.overheid.aerius.wui.main.ui.editor" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:nl.overheid.aerius.wui.widget">
+  <ui:with field='i18n' type='nl.overheid.aerius.wui.i18n.ApplicationMessages' />
+  <ui:with field='img' type='nl.overheid.aerius.wui.resources.ImageResources' />
+  <ui:with field='res' type='nl.overheid.aerius.wui.resources.R' />
+  <ui:style>
+    .border {
+    border-top: 1px solid #f5f5f5;
+    padding: 10px;
+    user-select: none;
+    }
+    .label {
+    padding: 0px 10px;
+    }
+    .slider {
+    margin-top: 12px;
+    }
+    .legend {
+    overflow: hidden;
+    box-sizing:
+    border-box;
+    }
+    .inner {
+    padding: 10px;
+    }
+    .button {
+    cursor: pointer;
+    }
+  </ui:style>
+  <g:FlowPanel styleName=" {style.border} {res.css.noShrink}">
+    <g:FlowPanel styleName="{res.css.flex} {res.css.alignCenter} {res.css.distribute}">
+      <w:FlipButton ui:field="flipButton" />
+      <g:Label ui:field="name" styleName="{style.label} {res.css.grow}" />
+      <g:ToggleButton ui:field="removeButton" styleName="{style.button}" />
+    </g:FlowPanel>
+    <w:AnimatedFlowPanel ui:field="legend" styleName="{style.legend}" visible="false">
+      <w:SliderBar ui:field="opacitySlider" addStyleNames="{style.slider}" />
+      <g:SimplePanel styleName="{style.inner}">
+        <g:Label text="Legenda" />
+      </g:SimplePanel>
+    </w:AnimatedFlowPanel>
+  </g:FlowPanel>
+</ui:UiBinder>
