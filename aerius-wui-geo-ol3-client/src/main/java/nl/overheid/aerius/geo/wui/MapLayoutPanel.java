@@ -71,7 +71,7 @@ public class MapLayoutPanel implements HasEventBus {
     map = MapUtil.prepareMap(uniqueId, projection);
 
     // Base layer preparation. COMMAND OR EVENT!?
-    final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg);
+    final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg, eventBus);
     eventBus.fireEvent(new LayerAddedCommand(baseLayer));
 
     MapUtil.prepareControls(map);

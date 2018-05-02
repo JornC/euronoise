@@ -91,5 +91,7 @@ public class MapViewImpl extends EventComposite implements MapView {
       GWT.log("Adding layer: " + layer);
       eventBus.fireEvent(new LayerAddedCommand(layer));
     }
+    
+    MapUtil.loadInfrastructureLayers();
   }
 }

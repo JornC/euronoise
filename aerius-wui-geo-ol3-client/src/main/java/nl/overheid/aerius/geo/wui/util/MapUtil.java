@@ -32,6 +32,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import elemental2.dom.Node;
 import nl.overheid.aerius.geo.BBox;
 import nl.overheid.aerius.geo.command.InfoLocationChangeCommand;
+import nl.overheid.aerius.geo.command.LayerAddedCommand;
 import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.domain.Point;
@@ -98,6 +99,7 @@ public final class MapUtil {
   private static HashSet<String> interestItems = new HashSet<>();
   private static EPSG epsg;
   private static Map map;
+  private static EventBus eventBus;
   static {
     interestItems.add("pand.2087049");
     interestItems.add("pand.7461654");
@@ -204,11 +206,101 @@ public final class MapUtil {
         highlightFeature(map, overlaySource, feature);
       }
     });
-    
+
+    map.addClickListener(e -> {
+      final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f);
+
+      if (feature != null) {
+        selectFeature(feature);
+      }
+    });
+
     getFeatures(map, vectorSource, epsg, requestBuilder, wfs, counter);
 
     return new OL3Layer[] { wrap(wfsLayer, info), wrap(overlayLayer, info) };
   }
+
+  public static void loadInfrastructureLayers() {
+    GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addLayer("HWN", f, getHwnStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addLayer("OWN", f, getOwnStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addLayer("puntbronnen", f, getPuntBronStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/schermen.geojson", f -> addLayer("schermen", f, getSchermenStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addLayer("spoorbaan", f, getSpoorbaanStyle()));
+  }
+
+
+  private static Style getHwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(225, 113, 13, 1f));
+    strokeOptions.setWidth(4);
+    
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getOwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(130, 247, 253, 1f));
+    strokeOptions.setWidth(4);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getSpoorbaanStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(204, 204, 0, 1f));
+    strokeOptions.setWidth(4);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getSchermenStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(236, 95, 232, 1f));
+    strokeOptions.setWidth(4);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getPuntBronStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(204, 0, 52, 1f));
+    strokeOptions.setWidth(4);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static void addLayer(String name, Feature[] f, Style style) {
+    final Vector lyrSource = new Vector();
+    final VectorLayerOptions lyrOptions = new VectorLayerOptions();
+    lyrOptions.setSource(lyrSource);
+    final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
+    layer.setStyle(style);
+
+    lyrSource.addFeatures(f);
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
+  }
+
+  private static void selectFeature(Feature feature) {}
 
   private static void nothing(final Map map, final Vector overlaySource) {
     if (overlaySource.getFeatures().length > 0) {
@@ -225,8 +317,6 @@ public final class MapUtil {
       }
       overlaySource.removeFeature(previousFeature);
     }
-
-    GWT.log("Selected feature: " + f.getId());
 
     map.getTargetElement().getStyle().setCursor(Cursor.POINTER);
     overlaySource.addFeature(f);
@@ -392,9 +482,10 @@ public final class MapUtil {
     return wrap(wmsLayer, info);
   }
 
-  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg) {
+  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg, EventBus eventBus) {
     MapUtil.map = map;
     MapUtil.epsg = epsg;
+    MapUtil.eventBus = eventBus;
     final WmtsOptions wmtsOptions = OLFactory.createOptions();
     // https://geodata.nationaalgeoregister.nl/tiles/service/wmts?request=GetCapabilities&service=WMTS
     wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts");
