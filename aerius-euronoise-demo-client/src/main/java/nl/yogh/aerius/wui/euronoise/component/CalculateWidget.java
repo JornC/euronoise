@@ -39,10 +39,14 @@ public class CalculateWidget extends EventComposite {
 
   @UiHandler("calculate")
   public void onCalculateClick(final ClickEvent e) {
-    eventBus.fireEvent(new CalculateInitEvent());
-
     infoPanel.getElement().getStyle().setHeight(0, Unit.PX);
     CalculateWidget.this.getElement().getStyle().setHeight(58, Unit.PX);
+
+    Scheduler.get().scheduleFixedDelay(() -> {
+      eventBus.fireEvent(new CalculateInitEvent());
+
+      return false;
+    }, 200);
 
     Scheduler.get().scheduleFixedDelay(() -> {
       progressPanel.getElement().getStyle().setHeight(0, Unit.PX);

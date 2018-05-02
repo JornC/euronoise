@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
-  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:m="urn:import:nl.yogh.aerius.wui.euronoise.component.map">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:nl.yogh.gwt.wui.widget" xmlns:p="urn:import:nl.yogh.aerius.wui.widget"
+  xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:m="urn:import:nl.yogh.aerius.wui.euronoise.component.map">
   <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
   <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
   <ui:style>
@@ -8,17 +9,70 @@
     width: 120px;
     background-color: white;
     }
+    .logo {
+    width: 96px;
+    margin: 30px 0px;
+    }
+    .logoPanel {
+    outline: 0;
+    }
+    .logoPanel:hover {
+    background: #dedede;
+    }
+    .logoPanel:active {
+    background: #cecece;
+    }
     .icon {
-    width: 48px;
+    width: 38px;
+    height: 32px;
+    background: black;
+    transition: background 0.15s ease-out;
+    cursor: pointer;
+    }
+    .label {
+    margin-top:
+    5px;
+    transition: color 0.15s ease-out;
+    user-select: none;
+    }
+    .item {
+    padding: 20px 0px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s
+    ease-out;
+    }
+    .item:hover > .label {
+    color: #e1710d;
+    }
+    .item:hover > .icon {
+    background: #e1710d !important;
+    }
+    .item:hover {
+    background: #dedede;
+    }
+    .item:active > .label {
+    color: #d16100;
+    }
+    .item:active > .icon {
+    background: #c16100 !important;
+    }
+    .item:active {
+    background: #cecece;
     }
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.columns} {style.panel} {res.css.alignCenter} {res.css.noShrink}">
-    <g:Button text="Omgevingswet" />
-    <g:FocusPanel>
-      <g:Image url="{res.layers.getSafeUri.asString}" styleName="{style.icon}" />
+    <g:FocusPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.logoPanel}" ui:field="logo">
+      <g:Image url="{res.logo.getSafeUri.asString}" styleName="{style.logo}" />
     </g:FocusPanel>
-    <g:Button text="Map layers" />
-    <g:Button text="Sources" />
+    <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}" ui:field="layers">
+      <g:SimplePanel styleName="{style.icon}" ui:field="layersButton" />
+      <g:Label text="Map layers" styleName="{style.label}" />
+    </g:FlowPanel>
+    <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}" ui:field="sources">
+      <g:SimplePanel ui:field="sourcesButton" styleName="{style.icon}" />
+      <g:Label text="Sources" styleName="{style.label}" />
+    </g:FlowPanel>
   </g:FlowPanel>
 </ui:UiBinder>
  

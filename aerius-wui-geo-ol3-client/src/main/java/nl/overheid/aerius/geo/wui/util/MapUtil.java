@@ -45,6 +45,7 @@ import ol.Collection;
 import ol.Coordinate;
 import ol.Extent;
 import ol.Feature;
+import ol.FeatureAtPixelOptions;
 import ol.Map;
 import ol.MapBrowserEvent;
 import ol.MapOptions;
@@ -162,27 +163,14 @@ public final class MapUtil {
     return interestItems.contains(id);
   }
 
-  public static IsLayer<Layer>[] prepareWFSBAGLayer() {
-    // create a vector layer
-    final Vector overlaySource = new Vector();
-    final VectorLayerOptions overlayLayerOptions = new VectorLayerOptions();
-    overlayLayerOptions.setSource(overlaySource);
-    final ol.layer.Vector overlayLayer = new ol.layer.Vector(overlayLayerOptions);
-    overlayLayer.setStyle(getBAGHighlightStyle());
-
+  public static IsLayer<Layer> prepareWFSBAGLayer() {
     // create a vector layer
     final Vector vectorSource = new Vector();
     final VectorLayerOptions vectorLayerOptions = new VectorLayerOptions();
     vectorLayerOptions.setSource(vectorSource);
     final ol.layer.Vector wfsLayer = new ol.layer.Vector(vectorLayerOptions);
 
-    wfsLayer.setStyleFunction(feature -> {
-      if (isInterest(feature.getId())) {
-        return new Style[] { getBAGInterestStyle() };
-      } else {
-        return new Style[] { getBAGStyle() };
-      }
-    });
+    wfsLayer.setStyle(getBAGStyle());
 
     // create a view
     final Wfs wfs = new Wfs();
@@ -197,27 +185,9 @@ public final class MapUtil {
     final LayerInfo info = new LayerInfo();
     info.setTitle("Actueel_ortho25_wfs");
 
-    map.addPointerMoveListener(e -> {
-      final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f);
-
-      if (feature == null) {
-        nothing(map, overlaySource);
-      } else {
-        highlightFeature(map, overlaySource, feature);
-      }
-    });
-
-    map.addClickListener(e -> {
-      final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f);
-
-      if (feature != null) {
-        selectFeature(feature);
-      }
-    });
-
     getFeatures(map, vectorSource, epsg, requestBuilder, wfs, counter);
 
-    return new OL3Layer[] { wrap(wfsLayer, info), wrap(overlayLayer, info) };
+    return wrap(wfsLayer, info);
   }
 
   public static void loadInfrastructureLayers() {
@@ -228,12 +198,70 @@ public final class MapUtil {
     GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addLayer("spoorbaan", f, getSpoorbaanStyle()));
   }
 
+  public static void loadBuildings() {
+    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing.geojson", f -> addHighlightLayer("buildings", f));
+  }
+
+  private static void addHighlightLayer(String name, Feature[] features) {
+    // create a vector layer
+    final Vector overlaySource = new Vector();
+    final VectorLayerOptions overlayLayerOptions = new VectorLayerOptions();
+    overlayLayerOptions.setSource(overlaySource);
+    final ol.layer.Vector overlayLayer = new ol.layer.Vector(overlayLayerOptions);
+    overlayLayer.setStyle(getBAGHighlightStyle());
+
+    final Vector lyrSource = new Vector();
+    final VectorLayerOptions lyrOptions = new VectorLayerOptions();
+    lyrOptions.setSource(lyrSource);
+    final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
+    layer.setStyle(getBAGStyle());
+
+    lyrSource.addFeatures(features);
+
+    FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
+    featureOptions.setLayerFilter(v -> v.equals(layer));
+
+    map.addPointerMoveListener(e -> {
+      final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f, featureOptions);
+
+      if (feature == null) {
+        nothing(map, overlaySource);
+      } else {
+        highlightFeature(map, overlaySource, feature);
+      }
+    });
+
+    map.addClickListener(e -> {
+      final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f, featureOptions);
+
+      if (feature != null) {
+        selectFeature(feature);
+      }
+    });
+
+    map.addMapZoomListener(e -> {
+      if (e.getMap().getView().getZoom() < 12) {
+        layer.setVisible(false);
+      } else {
+        layer.setVisible(true);
+      }
+    });
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    OL3Layer overlyr = wrap(overlayLayer, info);
+    eventBus.fireEvent(new LayerAddedCommand(overlyr));
+  }
 
   private static Style getHwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(225, 113, 13, 1f));
-    strokeOptions.setWidth(4);
-    
+    strokeOptions.setColor(new Color(254, 11, 11, 1f));
+    strokeOptions.setWidth(2);
+
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
 
@@ -242,8 +270,8 @@ public final class MapUtil {
 
   private static Style getOwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(130, 247, 253, 1f));
-    strokeOptions.setWidth(4);
+    strokeOptions.setColor(new Color(255, 153, 51, 1f));
+    strokeOptions.setWidth(2);
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
@@ -254,7 +282,7 @@ public final class MapUtil {
   private static Style getSpoorbaanStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(204, 204, 0, 1f));
-    strokeOptions.setWidth(4);
+    strokeOptions.setWidth(2);
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
@@ -264,7 +292,7 @@ public final class MapUtil {
 
   private static Style getSchermenStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(236, 95, 232, 1f));
+    strokeOptions.setColor(new Color(1, 90, 0, 1f));
     strokeOptions.setWidth(4);
 
     final StyleOptions options = OLFactory.createOptions();
@@ -300,7 +328,11 @@ public final class MapUtil {
     eventBus.fireEvent(new LayerAddedCommand(lyr));
   }
 
-  private static void selectFeature(Feature feature) {}
+  private static void selectFeature(Feature feature) {
+    eventBus.fireEvent(new SelectFeatureEvent(feature));
+    // int id = Integer.parseInt(feature.get("ELMID"));
+    // GWT.log("Selecint feature: " + feature.getGeometryName());
+  }
 
   private static void nothing(final Map map, final Vector overlaySource) {
     if (overlaySource.getFeatures().length > 0) {

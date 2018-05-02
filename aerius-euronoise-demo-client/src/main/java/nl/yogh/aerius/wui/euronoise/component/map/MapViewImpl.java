@@ -80,18 +80,16 @@ public class MapViewImpl extends EventComposite implements MapView {
     super.setEventBus(eventBus);
 
     MapUtil.setBaseMapUid(eventBus.getScopeId());
+
+    MapUtil.loadInfrastructureLayers();
   }
 
   public void showBuildings() {
     // final IsLayer<Layer> bagLayer = MapUtil.prepareBAGLayer(map, projection, epsg);
     // eventBus.fireEvent(new LayerAddedCommand(bagLayer));
 
-    final IsLayer<Layer>[] bagWfsLayers = MapUtil.prepareWFSBAGLayer();
-    for (final IsLayer<Layer> layer : bagWfsLayers) {
-      GWT.log("Adding layer: " + layer);
-      eventBus.fireEvent(new LayerAddedCommand(layer));
-    }
-    
-    MapUtil.loadInfrastructureLayers();
+//    final IsLayer<Layer> bagWfsLayers = MapUtil.prepareWFSBAGLayer();
+//    eventBus.fireEvent(new LayerAddedCommand(bagWfsLayers));
+    MapUtil.loadBuildings();
   }
 }

@@ -7,6 +7,13 @@
   <ui:style>
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow}">
+    <w:SwitchPanel ui:field="switchPanel">
+      <g:Label text="Noise load sources on this location" />
+      <g:FlowPanel>
+
+      </g:FlowPanel>
+      <w:SwitchPanel></w:SwitchPanel>
+    </w:SwitchPanel>
   </g:FlowPanel>
 </ui:UiBinder>
  
