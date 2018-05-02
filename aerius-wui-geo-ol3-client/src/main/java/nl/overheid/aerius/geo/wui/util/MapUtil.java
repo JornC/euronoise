@@ -90,11 +90,14 @@ import ol.tilegrid.WmtsTileGridOptions;
 public final class MapUtil {
   private static final String CLICK_EVENT_NAME = "click";
   private static final double MIN_WFS_ZOOM = 11;
-  protected static final int MAX_FEATURES = 1000;
+  protected static final int MAX_FEATURE_BATCH = 50;
+  protected static final int MAX_DRAW_FEATURES = 6000;
   private static String baseMapUid;
   private static Feature previousFeature;
 
   private static HashSet<String> interestItems = new HashSet<>();
+  private static EPSG epsg;
+  private static Map map;
   static {
     interestItems.add("pand.2087049");
     interestItems.add("pand.7461654");
@@ -157,7 +160,7 @@ public final class MapUtil {
     return interestItems.contains(id);
   }
 
-  public static IsLayer<Layer>[] prepareWFSBAGLayer(final Map map, final Projection projection, final EPSG epsg) {
+  public static IsLayer<Layer>[] prepareWFSBAGLayer() {
     // create a vector layer
     final Vector overlaySource = new Vector();
     final VectorLayerOptions overlayLayerOptions = new VectorLayerOptions();
@@ -201,6 +204,8 @@ public final class MapUtil {
         highlightFeature(map, overlaySource, feature);
       }
     });
+    
+    getFeatures(map, vectorSource, epsg, requestBuilder, wfs, counter);
 
     return new OL3Layer[] { wrap(wfsLayer, info), wrap(overlayLayer, info) };
   }
@@ -258,9 +263,9 @@ public final class MapUtil {
         final Node wfsNode = wfs.writeGetFeature(getFeaturesOptions);
         requestBuilder.setRequestData(new XMLSerializer().serializeToString(wfsNode));
         GWT.log("Got " + numberOfFeatures + " features.");
-        for (int i = 0; i < numberOfFeatures; i += MAX_FEATURES) {
-          GWT.log("Getting: " + i + " > " + (i + MAX_FEATURES));
-          getFeatures(map, getFeaturesOptions, vectorSource, epsg, requestBuilder, wfs, counter, latest, i, MAX_FEATURES);
+        for (int i = 0; i < Math.min(numberOfFeatures, MAX_DRAW_FEATURES); i += MAX_FEATURE_BATCH) {
+          GWT.log("Getting: " + i + " > " + (i + MAX_FEATURE_BATCH));
+          getFeatures(map, getFeaturesOptions, vectorSource, epsg, requestBuilder, wfs, counter, latest, i, MAX_FEATURE_BATCH);
         }
       }
 
@@ -388,6 +393,8 @@ public final class MapUtil {
   }
 
   public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg) {
+    MapUtil.map = map;
+    MapUtil.epsg = epsg;
     final WmtsOptions wmtsOptions = OLFactory.createOptions();
     // https://geodata.nationaalgeoregister.nl/tiles/service/wmts?request=GetCapabilities&service=WMTS
     wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts");

@@ -25,10 +25,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 
+import nl.overheid.aerius.geo.command.LayerAddedCommand;
+import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.gwt.wui.widget.EventComposite;
+import ol.layer.Layer;
 
 public class MapViewImpl extends EventComposite implements MapView {
   private static final MapViewImplUiBinder UI_BINDER = GWT.create(MapViewImplUiBinder.class);
@@ -51,13 +54,6 @@ public class MapViewImpl extends EventComposite implements MapView {
     this.mapPanel = map.asWidget();
 
     initWidget(UI_BINDER.createAndBindUi(this));
-  }
-
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-
-    GWT.log("woop");
   }
 
   public void show() {
@@ -84,5 +80,16 @@ public class MapViewImpl extends EventComposite implements MapView {
     super.setEventBus(eventBus);
 
     MapUtil.setBaseMapUid(eventBus.getScopeId());
+  }
+
+  public void showBuildings() {
+    // final IsLayer<Layer> bagLayer = MapUtil.prepareBAGLayer(map, projection, epsg);
+    // eventBus.fireEvent(new LayerAddedCommand(bagLayer));
+
+    final IsLayer<Layer>[] bagWfsLayers = MapUtil.prepareWFSBAGLayer();
+    for (final IsLayer<Layer> layer : bagWfsLayers) {
+      GWT.log("Adding layer: " + layer);
+      eventBus.fireEvent(new LayerAddedCommand(layer));
+    }
   }
 }

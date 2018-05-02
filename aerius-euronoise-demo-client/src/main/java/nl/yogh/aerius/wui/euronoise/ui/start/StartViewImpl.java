@@ -17,13 +17,5 @@ public class StartViewImpl extends EventComposite implements StartView {
   }
 
   @Override
-  public void setPresenter(final Presenter presenter) {
-
-  }
-
-  @Override
-  public void setEventBus(final EventBus eventBus) {
-    GWT.log("setting event");
-    super.setEventBus(eventBus);
-  }
+  public void setPresenter(final Presenter presenter) {}
 }

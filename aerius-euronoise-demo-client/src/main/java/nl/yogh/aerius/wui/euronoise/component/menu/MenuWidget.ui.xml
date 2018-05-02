@@ -12,7 +12,7 @@
     width: 48px;
     }
   </ui:style>
-  <g:FlowPanel styleName="{res.css.flex} {res.css.columns} {style.panel} {res.css.alignCenter}">
+  <g:FlowPanel styleName="{res.css.flex} {res.css.columns} {style.panel} {res.css.alignCenter} {res.css.noShrink}">
     <g:Button text="Omgevingswet" />
     <g:FocusPanel>
       <g:Image url="{res.layers.getSafeUri.asString}" styleName="{style.icon}" />

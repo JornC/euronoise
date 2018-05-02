@@ -8,10 +8,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.yogh.aerius.wui.ApplicationRootView;
 import nl.yogh.aerius.wui.euronoise.component.CalculateWidget;
 import nl.yogh.aerius.wui.euronoise.component.map.MapViewImpl;
+import nl.yogh.aerius.wui.euronoise.event.CalculateInitEvent;
 import nl.yogh.gwt.wui.place.PlaceController;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.NotificationPanel;
@@ -20,6 +23,10 @@ public class ApplicationRootViewImpl extends EventComposite implements Applicati
   private static final ApplicationRootViewImplUiBinder UI_BINDER = GWT.create(ApplicationRootViewImplUiBinder.class);
 
   interface ApplicationRootViewImplUiBinder extends UiBinder<Widget, ApplicationRootViewImpl> {}
+
+  interface ApplicationRootViewImplEventBinder extends EventBinder<ApplicationRootViewImpl> {}
+
+  private final ApplicationRootViewImplEventBinder EVENT_BINDER = GWT.create(ApplicationRootViewImplEventBinder.class);
 
   @UiField(provided = true) MapViewImpl map;
   @UiField CalculateWidget calculateWidget;
@@ -40,8 +47,17 @@ public class ApplicationRootViewImpl extends EventComposite implements Applicati
     contentPanel.setWidget(w);
   }
 
+  @EventHandler
+  public void onCalculateScenario(CalculateInitEvent e) {
+    GWT.log("Derp..");
+
+    map.showBuildings();
+  }
+
   @Override
   public void setEventBus(final EventBus eventBus) {
     super.setEventBus(eventBus, map, notificationPanel, calculateWidget);
+
+    EVENT_BINDER.bindEventHandlers(this, eventBus);
   }
 }

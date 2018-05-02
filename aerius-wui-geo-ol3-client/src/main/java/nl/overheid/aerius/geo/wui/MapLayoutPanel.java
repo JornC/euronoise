@@ -74,14 +74,6 @@ public class MapLayoutPanel implements HasEventBus {
     final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg);
     eventBus.fireEvent(new LayerAddedCommand(baseLayer));
 
-    // final IsLayer<Layer> bagLayer = MapUtil.prepareBAGLayer(map, projection, epsg);
-    // eventBus.fireEvent(new LayerAddedCommand(bagLayer));
-
-    final IsLayer<Layer>[] bagWfsLayers = MapUtil.prepareWFSBAGLayer(map, projection, epsg);
-    for (final IsLayer<Layer> layer : bagWfsLayers) {
-      eventBus.fireEvent(new LayerAddedCommand(layer));
-    }
-
     MapUtil.prepareControls(map);
 
     // TODO Move this elsewhere and add through event (non-interactive, top-layer)

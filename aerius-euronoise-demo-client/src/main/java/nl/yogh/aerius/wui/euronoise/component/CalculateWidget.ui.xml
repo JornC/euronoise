@@ -12,18 +12,26 @@
     border-top: none;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    position: absolute;
     left: 50%;
     margin-left: -300px;
     width: 600px;
     height: 0px;
     transition: height 0.35s ease-out;
     overflow: hidden;
+    position: absolute;
     }
     .calculatePanel {
-    padding: 20px;
+	overflow: hidden;
+	height: 93px;
+    transition: height 0.35s ease-out;
+    }
+    .progressPanel {
+	overflow: hidden;
+	height: 78px;
+    transition: height 0.35s ease-out;
     }
     .text {
+    padding: 20px;
     color: #333;
     }
     .calculate {
@@ -32,7 +40,6 @@
     padding: 10px 20px;
     outline: 0;
     float: right;
-    margin-top: 20px;
     margin-right: 40px;
     border: 0;
     border-radius: 15px;
@@ -47,11 +54,26 @@
     color: #eee;
     background-color: #8e4300;
     }
+    .progress {
+    padding: 20px;
+    }
+    .completePanel {
+	overflow: hidden;
+	height: 0px;
+    transition: height 0.35s ease-out;
+    }
   </ui:style>
   <g:FlowPanel styleName="{style.panel}">
-    <g:FlowPanel styleName="{style.calculatePanel}">
+    <g:FlowPanel styleName="{style.completePanel}" ui:field="completePanel">
+      <g:Label text="Calculation complete!" styleName="{style.progress}" />
+      <g:Button text="Close" styleName="{style.calculate}" ui:field="close" />
+    </g:FlowPanel>
+    <g:FlowPanel styleName="{style.calculatePanel}" ui:field="infoPanel">
       <g:Label text="Your scenario 'Westport' with two situations was successfully uploaded." styleName="{style.text}" />
       <g:Button text="Calculate" styleName="{style.calculate}" ui:field="calculate" />
+    </g:FlowPanel>
+    <g:FlowPanel styleName="{style.progressPanel}" ui:field="progressPanel">
+      <g:Label text="Calculating...." styleName="{style.progress}" />
     </g:FlowPanel>
   </g:FlowPanel>
 </ui:UiBinder>

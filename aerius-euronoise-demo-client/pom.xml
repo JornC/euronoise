@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>nl.yogh</groupId>
@@ -9,7 +10,7 @@
   <packaging>war</packaging>
 
   <properties>
-    <application.gwt.module>nl.yogh.aerius.Demo</application.gwt.module>
+    <application.gwt.module>nl.yogh.aerius.EuroNoiseDebug</application.gwt.module>
   </properties>
 
   <dependencies>
@@ -65,8 +66,13 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <configuration>
-        </configuration>
+        <executions>
+          <execution>
+            <configuration>
+              <module>${application.gwt.module}</module>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
