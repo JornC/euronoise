@@ -10,7 +10,7 @@
   <packaging>war</packaging>
 
   <properties>
-    <application.gwt.module>nl.yogh.aerius.EuroNoiseDebug</application.gwt.module>
+    <application.gwt.module>nl.yogh.aerius.EuroNoiseDemo</application.gwt.module>
   </properties>
 
   <dependencies>
