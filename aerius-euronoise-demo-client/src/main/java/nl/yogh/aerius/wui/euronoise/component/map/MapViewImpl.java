@@ -19,21 +19,20 @@ package nl.yogh.aerius.wui.euronoise.component.map;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 
-import nl.overheid.aerius.geo.command.LayerAddedCommand;
-import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.gwt.wui.widget.EventComposite;
-import ol.layer.Layer;
 
-public class MapViewImpl extends EventComposite implements MapView {
+public class MapViewImpl extends EventComposite implements MapView, RequiresResize {
   private static final MapViewImplUiBinder UI_BINDER = GWT.create(MapViewImplUiBinder.class);
 
   interface MapViewImplUiBinder extends UiBinder<Widget, MapViewImpl> {}
@@ -42,11 +41,11 @@ public class MapViewImpl extends EventComposite implements MapView {
 
   private final MapViewImplEventBinder EVENT_BINDER = GWT.create(MapViewImplEventBinder.class);
 
-  private boolean attached;
-
   private final Map map;
 
   @UiField(provided = true) Widget mapPanel;
+
+  private boolean loadMap;
 
   @Inject
   public MapViewImpl(final Map map) {
@@ -54,14 +53,6 @@ public class MapViewImpl extends EventComposite implements MapView {
     this.mapPanel = map.asWidget();
 
     initWidget(UI_BINDER.createAndBindUi(this));
-  }
-
-  public void show() {
-    if (!attached) {
-      map.attach();
-
-      attached = true;
-    }
   }
 
   @Override
@@ -75,12 +66,31 @@ public class MapViewImpl extends EventComposite implements MapView {
       map.registerEventCohort(this);
     }
   }
+  
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    
+    if (loadMap) {
+      loadMap();
+    }
+  }
 
   public void setMapEventBus(final MapEventBus eventBus) {
     super.setEventBus(eventBus);
-
+    
+    MapUtil.setEventBus(eventBus);
     MapUtil.setBaseMapUid(eventBus.getScopeId());
 
+    if (!mapPanel.isAttached()) {
+      loadMap = true;
+    } else {
+      GWT.log("Loading map..");
+      loadMap();
+    }
+  }
+
+  private void loadMap() {
     MapUtil.loadInfrastructureLayers();
   }
 
@@ -88,8 +98,13 @@ public class MapViewImpl extends EventComposite implements MapView {
     // final IsLayer<Layer> bagLayer = MapUtil.prepareBAGLayer(map, projection, epsg);
     // eventBus.fireEvent(new LayerAddedCommand(bagLayer));
 
-//    final IsLayer<Layer> bagWfsLayers = MapUtil.prepareWFSBAGLayer();
-//    eventBus.fireEvent(new LayerAddedCommand(bagWfsLayers));
+    // final IsLayer<Layer> bagWfsLayers = MapUtil.prepareWFSBAGLayer();
+    // eventBus.fireEvent(new LayerAddedCommand(bagWfsLayers));
     MapUtil.loadBuildings();
+  }
+
+  @Override
+  public void onResize() {
+    Scheduler.get().scheduleDeferred(() -> map.onResize());
   }
 }

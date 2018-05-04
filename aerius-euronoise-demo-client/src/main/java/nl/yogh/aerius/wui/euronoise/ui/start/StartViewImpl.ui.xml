@@ -4,15 +4,124 @@
   xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component">
   <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
   <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
-  <ui:style>
-  </ui:style>
-  <g:FlowPanel styleName="{res.css.flex} {res.css.grow}">
-    <w:SwitchPanel ui:field="switchPanel">
-      <g:Label text="Noise load sources on this location" />
-      <g:FlowPanel>
+  <ui:style type="nl.yogh.aerius.wui.euronoise.ui.start.StartViewImpl.CustomStyle">
+    .panel {
+    max-width: 340px;
+    }
+    .actualContent {
+    width: 340px;
+    background: white;
+    border-left: 2px solid #333;
+    box-sizing: border-box;
+    }
+    .text {
+    padding: 10px;
+    margin: 88px 0px 20px;;
+    }
+    .icon {
+    width:
+    32px;
+    height: 32px;
+    background: black;
+    transition: background 0.15s ease-out;
+    cursor: pointer;
+    }
+    .label {
+    padding-top: 10px;
+    display: none;
+    }
+    .item {
+    cursor: pointer;
+    transition: background 0.15s
+    ease-out;
+    padding: 20px 40px;
+    }
+    .item:hover > .label {
+    color: #e1710d;
+    display: block;
+    }
+    .selected > .item > .icon, .item:hover > .icon {
+    background: #e1710d !important;
+    }
+    .item:hover {
+    background: #dedede;
+    }
+    .selected > .item > .label, .item:active > .label {
+    color: #d16100;
+    }
+    .item:active > .icon {
+    background: #c16100
+    !important;
+    }
+    .item:active {
+    background: #cecece;
+    }
+    .menu {
+    height: 100px;
+    }
 
+    .disabled {
+    cursor:
+    auto !important;
+    user-select: none;
+    pointer-events: none;
+    }
+    .disabled > .icon {
+    background: #aaa !important;
+    }
+    .disabled > .label {
+    color: #aaa
+    !important;
+    }
+    .btn {
+    outline: none;
+    width: 90px;
+    }
+    .content {
+    margin-top: 20px;
+    width: 320px;
+    }
+    .selected {
+    
+    }
+  </ui:style>
+  <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {style.panel}">
+    <w:SwitchPanel ui:field="switchPanel" styleName="{res.css.flex}">
+      <g:FlowPanel styleName="{style.actualContent} {res.css.grow}">
+        <g:Label text="Noise load sources on this location" styleName="{style.text}" />
+        <g:FlowPanel styleName="{res.css.flex} {style.menu}">
+          <g:FocusPanel ui:field="rails" styleName="{style.btn}">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}">
+              <g:SimplePanel styleName="{style.icon}" ui:field="railsButton" />
+              <g:Label text="Railways" styleName="{style.label}" />
+            </g:FlowPanel>
+          </g:FocusPanel>
+          <g:FocusPanel ui:field="roads" styleName="{style.btn}">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}">
+              <g:SimplePanel styleName="{style.icon}" ui:field="roadsButton" />
+              <g:Label text="Roads" styleName="{style.label}" />
+            </g:FlowPanel>
+          </g:FocusPanel>
+          <g:FocusPanel styleName="{style.btn}">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.disabled}"
+              ui:field="industry">
+              <g:SimplePanel styleName="{style.icon}" ui:field="industryButton" />
+              <g:Label text="Industry" styleName="{style.label}" />
+            </g:FlowPanel>
+          </g:FocusPanel>
+          <g:FocusPanel styleName="{style.btn}">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.disabled}"
+              ui:field="airTraffic">
+              <g:SimplePanel styleName="{style.icon}" ui:field="airTrafficButton" />
+              <g:Label text="Air traffic" styleName="{style.label}" />
+            </g:FlowPanel>
+          </g:FocusPanel>
+        </g:FlowPanel>
+        <w:SwitchPanel ui:field="contentSwitchPanel" styleName="{style.content}">
+          <g:Label text="trains" />
+          <g:Label text="roads" />
+        </w:SwitchPanel>
       </g:FlowPanel>
-      <w:SwitchPanel></w:SwitchPanel>
     </w:SwitchPanel>
   </g:FlowPanel>
 </ui:UiBinder>

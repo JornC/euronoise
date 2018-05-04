@@ -17,6 +17,11 @@
 package nl.overheid.aerius.geo.wui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
@@ -71,7 +76,7 @@ public class MapLayoutPanel implements HasEventBus {
     map = MapUtil.prepareMap(uniqueId, projection);
 
     // Base layer preparation. COMMAND OR EVENT!?
-    final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg, eventBus);
+    final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg);
     eventBus.fireEvent(new LayerAddedCommand(baseLayer));
 
     MapUtil.prepareControls(map);
@@ -109,6 +114,10 @@ public class MapLayoutPanel implements HasEventBus {
     if (!success) {
       c.silence();
     }
+  }
+
+  public void resize() {
+    map.updateSize();
   }
 
   /**

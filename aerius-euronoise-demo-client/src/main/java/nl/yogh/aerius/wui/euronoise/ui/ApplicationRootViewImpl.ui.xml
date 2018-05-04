@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
-  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:map="urn:import:nl.yogh.aerius.wui.euronoise.component.map"
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:nl.yogh.gwt.wui.widget" xmlns:p="urn:import:nl.yogh.aerius.wui.widget"
+  xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:map="urn:import:nl.yogh.aerius.wui.euronoise.component.map"
   xmlns:menu="urn:import:nl.yogh.aerius.wui.euronoise.component.menu">
   <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
   <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
@@ -10,12 +11,18 @@
     right: 0px;
     top: 0px;
     }
+    .contentPanel {
+    max-width: 340px;
+    }
+    .content {
+    height: 100%;
+    }
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {res.css.globalMaxWidth}">
     <c:CalculateWidget ui:field="calculateWidget" />
     <menu:MenuWidget ui:field="menuPanel" />
-    <g:SimplePanel ui:field="contentPanel" />
-    <map:MapViewImpl ui:field="map" styleName=" {res.css.flex} {res.css.grow}" />
+    <g:SimplePanel ui:field="contentPanel" styleName="{res.css.flex} {res.css.columns} {style.content} {style.contentPanel} {res.css.noShrink}" />
+    <map:MapViewImpl ui:field="map" styleName=" {res.css.flex} {style.content} {res.css.grow}" />
     <w:NotificationPanel styleName="{style.notificationAbsolute}" ui:field="notificationPanel" />
   </g:FlowPanel>
 </ui:UiBinder>

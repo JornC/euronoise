@@ -37,6 +37,7 @@ import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.domain.Point;
 import nl.overheid.aerius.geo.epsg.EPSG;
+import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.util.ReceptorUtil;
 import nl.overheid.aerius.geo.wui.layers.InformationLayer;
 import nl.overheid.aerius.geo.wui.layers.OL3Layer;
@@ -514,10 +515,9 @@ public final class MapUtil {
     return wrap(wmsLayer, info);
   }
 
-  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg, EventBus eventBus) {
+  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg) {
     MapUtil.map = map;
     MapUtil.epsg = epsg;
-    MapUtil.eventBus = eventBus;
     final WmtsOptions wmtsOptions = OLFactory.createOptions();
     // https://geodata.nationaalgeoregister.nl/tiles/service/wmts?request=GetCapabilities&service=WMTS
     wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts");
@@ -591,5 +591,9 @@ public final class MapUtil {
 
   public static String getBaseMapUid() {
     return baseMapUid;
+  }
+
+  public static void setEventBus(EventBus eventBus) {
+    MapUtil.eventBus = eventBus;
   }
 }

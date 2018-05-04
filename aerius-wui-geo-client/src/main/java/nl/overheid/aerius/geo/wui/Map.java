@@ -17,10 +17,11 @@
 package nl.overheid.aerius.geo.wui;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
 
 import nl.yogh.gwt.wui.widget.HasEventBus;
 
-public interface Map extends IsWidget, HasEventBus {
+public interface Map extends IsWidget, HasEventBus, RequiresResize {
   void attach();
 
   void registerEventCohort(HasEventBus eventBus);

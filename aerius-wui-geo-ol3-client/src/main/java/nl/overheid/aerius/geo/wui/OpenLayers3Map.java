@@ -85,4 +85,9 @@ public class OpenLayers3Map extends Composite implements Map {
   public void registerEventCohort(final HasEventBus cohort) {
     cohort.setEventBus(eventBus);
   }
+
+  @Override
+  public void onResize() {
+    map.resize();
+  }
 }

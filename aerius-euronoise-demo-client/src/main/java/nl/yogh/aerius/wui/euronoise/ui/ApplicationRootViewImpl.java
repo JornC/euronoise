@@ -11,6 +11,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
 import nl.yogh.aerius.wui.ApplicationRootView;
 import nl.yogh.aerius.wui.euronoise.component.CalculateWidget;
 import nl.yogh.aerius.wui.euronoise.component.map.MapViewImpl;
@@ -49,9 +50,12 @@ public class ApplicationRootViewImpl extends EventComposite implements Applicati
 
   @EventHandler
   public void onCalculateScenario(CalculateInitEvent e) {
-    GWT.log("Derp..");
-
     map.showBuildings();
+  }
+  
+  @EventHandler
+  public void onSelectFeatureEvent(SelectFeatureEvent e) {
+    map.onResize();
   }
 
   @Override
