@@ -67,6 +67,8 @@ public class StartViewImpl extends EventComposite implements StartView {
         .getStyle()
         .setProperty("WebkitMaskImage", "url(" + R.images().sourceAirTraffic().getSafeUri()
             .asString() + ")");
+
+    selectRoads();
   }
 
   @UiHandler("rails")
@@ -86,6 +88,10 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   @UiHandler("roads")
   public void onRoadsClick(ClickEvent e) {
+    selectRoads();
+  }
+
+  private void selectRoads() {
     contentSwitchPanel.showWidget(1);
     select(roads);
   }

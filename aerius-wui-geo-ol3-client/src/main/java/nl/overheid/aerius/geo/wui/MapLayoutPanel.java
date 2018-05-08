@@ -16,12 +16,10 @@
  */
 package nl.overheid.aerius.geo.wui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
@@ -51,6 +49,8 @@ public class MapLayoutPanel implements HasEventBus {
   private Map map;
   private EventBus eventBus;
   private final ReceptorUtil receptorUtil;
+
+  private List<Layer> deferred = new ArrayList<>();
 
   @Inject
   public MapLayoutPanel(final EPSG epsg, final ReceptorUtil receptorUtil) {
@@ -83,6 +83,14 @@ public class MapLayoutPanel implements HasEventBus {
 
     // TODO Move this elsewhere and add through event (non-interactive, top-layer)
     MapUtil.prepareInformationLayer(map, projection, eventBus, receptorUtil);
+    
+    completeDeferred();
+  }
+
+  private void completeDeferred() {
+    for (Layer l : deferred) {
+      addLayer(l);
+    }
   }
 
   @EventHandler
@@ -154,11 +162,20 @@ public class MapLayoutPanel implements HasEventBus {
   /**
    * To be used only as a delegate method from an command handler and not directly.
    */
-  private boolean addLayer(final Layer baseLayer) {
-    map.addLayer(baseLayer);
+  private boolean addLayer(final Layer layer) {
+    if (map == null) {
+      deferAddLayer(layer);
+      return false;
+    }
+    
+    map.addLayer(layer);
 
     // TODO Implement action indication
     return true;
+  }
+
+  private void deferAddLayer(Layer layer) {
+    deferred.add(layer);
   }
 
   /**
