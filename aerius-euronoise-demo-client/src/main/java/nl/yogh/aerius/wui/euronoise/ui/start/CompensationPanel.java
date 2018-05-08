@@ -1,13 +1,17 @@
 package nl.yogh.aerius.wui.euronoise.ui.start;
 
+import java.util.Set;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 
+import nl.yogh.aerius.wui.domain.RoadMeasure;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.SwitchPanel;
 
@@ -28,6 +32,8 @@ public class CompensationPanel extends EventComposite {
   @UiField Widget rightTab;
 
   private Widget selected;
+
+  @UiField RoadsMeasureTable roadsMeasureTable;
 
   public CompensationPanel() {
     initWidget(UI_BINDER.createAndBindUi(this));
@@ -55,5 +61,10 @@ public class CompensationPanel extends EventComposite {
   public void onRightTabClick(final ClickEvent e) {
     setSelectedTab(rightTab);
     switchPanel.showWidget(1);
+  }
+
+  @UiHandler("roadsMeasureTable")
+  public void onRoadsMeasureTable(final ValueChangeEvent<Set<RoadMeasure>> e) {
+    eventBus.fireEvent(new MeasureSelectedEvent(e.getValue()));
   }
 }

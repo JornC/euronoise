@@ -42,7 +42,7 @@
     </g:FlowPanel>
     <w:SwitchPanel ui:field="switchPanel">
       <s:RoadsOverloadTable addStyleNames="{style.subPanel}" />
-      <s:RoadsMeasureTable addStyleNames="{style.subPanel}" />
+      <s:RoadsMeasureTable addStyleNames="{style.subPanel}" ui:field="roadsMeasureTable" />
     </w:SwitchPanel>
   </g:FlowPanel>
 </ui:UiBinder>

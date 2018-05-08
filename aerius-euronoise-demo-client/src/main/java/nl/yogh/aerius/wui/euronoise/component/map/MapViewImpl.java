@@ -32,6 +32,7 @@ import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
+import nl.yogh.aerius.wui.euronoise.ui.start.MeasureSelectedEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 
 public class MapViewImpl extends EventComposite implements MapView {
@@ -106,6 +107,11 @@ public class MapViewImpl extends EventComposite implements MapView {
   @EventHandler
   public void onSelectRoad(final RoadHighlightEvent e) {
     GWT.log("Gotta highlight road: " + e.getValue());
+  }
+
+  @EventHandler
+  public void onMeasureSelected(final MeasureSelectedEvent e) {
+    MapUtil.setTriggerLowerValues(!e.getValue().isEmpty());
   }
 
   public void showBuildings() {

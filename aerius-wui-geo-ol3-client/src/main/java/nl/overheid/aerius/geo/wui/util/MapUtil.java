@@ -111,6 +111,13 @@ public final class MapUtil {
   private static ol.layer.Vector markerAffectedLayer;
   private static ol.layer.Vector markerSelectedLayer;
 
+  private static final double DECIBELS_MIN = 55D;
+  private static final double DECIBELS_MAX = 67D;
+
+  private static final String[] colors = new String[] { "#ffffe0", "#ffd59b", "#ffa474", "#f47461", "#db4551", "#b81b34", "#8b0000" };
+  private static boolean lowerValues;
+  private static Vector resultLayerSource;
+
   private MapUtil() {}
 
   public static Map prepareMap(final String target, final Projection projection) {
@@ -119,10 +126,10 @@ public final class MapUtil {
     viewOptions.setProjection(projection);
     final View view = new View(viewOptions);
 
-    final Coordinate centerCoordinate = OLFactory.createCoordinate(117631.26876462143D, 489868.0364256811D);
+    final Coordinate centerCoordinate = OLFactory.createCoordinate(118128.36D,489157.2);
 
     view.setCenter(centerCoordinate);
-    view.setZoom(11);
+    view.setZoom(12);
 
     // create the map
     final MapOptions mapOptions = OLFactory.createOptions();
@@ -285,6 +292,8 @@ public final class MapUtil {
     final FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
     featureOptions.setLayerFilter(v -> v.equals(layer));
 
+    map.addMoveEndListener(e -> GWT.log("Center: " + map.getView().getCenter()));
+
     map.addMapZoomListener(e -> {
       if (e.getMap().getView().getZoom() < 12) {
         layer.setVisible(false);
@@ -302,6 +311,10 @@ public final class MapUtil {
     GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing_filtered.geojson", f -> addHighlightLayer("buildings_filtered", f));
   }
 
+  private static String getProperGradientColor(final double decibels) {
+    return colors[Math.max(0, Math.min(colors.length - 1, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))];
+  }
+
   private static void addHighlightLayer(final String name, final Feature[] features) {
     // create a vector layer
     final Vector overlaySource = new Vector();
@@ -310,13 +323,25 @@ public final class MapUtil {
     final ol.layer.Vector overlayLayer = new ol.layer.Vector(overlayLayerOptions);
     overlayLayer.setStyle(getBAGHighlightStyle());
 
-    final Vector lyrSource = new Vector();
+    resultLayerSource = new Vector();
     final VectorLayerOptions lyrOptions = new VectorLayerOptions();
-    lyrOptions.setSource(lyrSource);
+    lyrOptions.setSource(resultLayerSource);
     final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
-    layer.setStyle(getBAGStyle());
+    layer.setStyleFunction(object -> {
+      final Style bagStyle = getBAGStyle();
 
-    lyrSource.addFeatures(features);
+      final Object str = object.get(lowerValues ? "A10_metMa" : "A10_zonder");
+      if (str != null) {
+        final double decibels = (Double) str;
+        final String color = getProperGradientColor(decibels);
+        final Color colorFromString = Color.getColorFromString(color);
+        bagStyle.getFill().setColor(colorFromString);
+      }
+
+      return new Style[] { bagStyle };
+    });
+
+    resultLayerSource.addFeatures(features);
 
     final FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
     featureOptions.setLayerFilter(v -> v.equals(layer));
@@ -451,6 +476,7 @@ public final class MapUtil {
 
   private static void getFeatures(final Map map, final Vector vectorSource, final EPSG epsg, final RequestBuilder requestBuilder, final Wfs wfs,
       final GWTAtomicInteger counter) {
+    GWT.log("Center: " + map.getView().getCenter());
     if (map.getView().getZoom() < MIN_WFS_ZOOM) {
       vectorSource.clear(true);
       return;
@@ -688,5 +714,10 @@ public final class MapUtil {
 
   public static void setEventBus(final EventBus eventBus) {
     MapUtil.eventBus = eventBus;
+  }
+
+  public static void setTriggerLowerValues(final boolean lowerValues) {
+    MapUtil.lowerValues = lowerValues;
+    resultLayerSource.refresh();
   }
 }

@@ -112,7 +112,7 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   @Override
   public void setEventBus(final EventBus eventBus) {
-    super.setEventBus(eventBus);
+    super.setEventBus(eventBus, compensationPanel);
 
     EVENT_BINDER.bindEventHandlers(this, eventBus);
   }
