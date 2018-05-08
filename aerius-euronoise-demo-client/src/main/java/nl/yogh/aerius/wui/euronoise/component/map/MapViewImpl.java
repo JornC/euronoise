@@ -22,17 +22,19 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
+import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
+import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 
-public class MapViewImpl extends EventComposite implements MapView, RequiresResize {
+public class MapViewImpl extends EventComposite implements MapView {
   private static final MapViewImplUiBinder UI_BINDER = GWT.create(MapViewImplUiBinder.class);
 
   interface MapViewImplUiBinder extends UiBinder<Widget, MapViewImpl> {}
@@ -66,11 +68,11 @@ public class MapViewImpl extends EventComposite implements MapView, RequiresResi
       map.registerEventCohort(this);
     }
   }
-  
+
   @Override
   protected void onLoad() {
     super.onLoad();
-    
+
     if (loadMap) {
       loadMap();
     }
@@ -78,7 +80,7 @@ public class MapViewImpl extends EventComposite implements MapView, RequiresResi
 
   public void setMapEventBus(final MapEventBus eventBus) {
     super.setEventBus(eventBus);
-    
+
     MapUtil.setEventBus(eventBus);
     MapUtil.setBaseMapUid(eventBus.getScopeId());
 
@@ -94,6 +96,18 @@ public class MapViewImpl extends EventComposite implements MapView, RequiresResi
     MapUtil.loadInfrastructureLayers();
   }
 
+  @EventHandler
+  public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
+    MapUtil.hideInfrastructureLayers();
+
+    //    MapUtil.displayMarkers();
+  }
+
+  @EventHandler
+  public void onSelectRoad(final RoadHighlightEvent e) {
+    GWT.log("Gotta highlight road: " + e.getValue());
+  }
+
   public void showBuildings() {
     // final IsLayer<Layer> bagLayer = MapUtil.prepareBAGLayer(map, projection, epsg);
     // eventBus.fireEvent(new LayerAddedCommand(bagLayer));
@@ -103,7 +117,6 @@ public class MapViewImpl extends EventComposite implements MapView, RequiresResi
     MapUtil.loadBuildings();
   }
 
-  @Override
   public void onResize() {
     Scheduler.get().scheduleDeferred(() -> map.onResize());
   }

@@ -49,12 +49,12 @@ public class ApplicationRootViewImpl extends EventComposite implements Applicati
   }
 
   @EventHandler
-  public void onCalculateScenario(CalculateInitEvent e) {
+  public void onCalculateScenario(final CalculateInitEvent e) {
     map.showBuildings();
   }
-  
+
   @EventHandler
-  public void onSelectFeatureEvent(SelectFeatureEvent e) {
+  public void onSelectFeatureEvent(final SelectFeatureEvent e) {
     map.onResize();
   }
 

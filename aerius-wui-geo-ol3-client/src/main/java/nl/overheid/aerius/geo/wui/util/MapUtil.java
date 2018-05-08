@@ -16,7 +16,8 @@
  */
 package nl.overheid.aerius.geo.wui.util;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.desjardins.elemental.XMLSerializer;
 import com.google.gwt.core.shared.GWT;
@@ -33,11 +34,11 @@ import elemental2.dom.Node;
 import nl.overheid.aerius.geo.BBox;
 import nl.overheid.aerius.geo.command.InfoLocationChangeCommand;
 import nl.overheid.aerius.geo.command.LayerAddedCommand;
+import nl.overheid.aerius.geo.command.LayerHiddenCommand;
 import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.domain.Point;
 import nl.overheid.aerius.geo.epsg.EPSG;
-import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.util.ReceptorUtil;
 import nl.overheid.aerius.geo.wui.layers.InformationLayer;
 import nl.overheid.aerius.geo.wui.layers.OL3Layer;
@@ -47,6 +48,7 @@ import ol.Coordinate;
 import ol.Extent;
 import ol.Feature;
 import ol.FeatureAtPixelOptions;
+import ol.FeatureOptions;
 import ol.Map;
 import ol.MapBrowserEvent;
 import ol.MapOptions;
@@ -76,10 +78,13 @@ import ol.source.ImageWms;
 import ol.source.ImageWmsOptions;
 import ol.source.ImageWmsParams;
 import ol.source.Vector;
+import ol.source.VectorOptions;
 import ol.source.Wmts;
 import ol.source.WmtsOptions;
 import ol.style.Fill;
 import ol.style.FillOptions;
+import ol.style.Icon;
+import ol.style.IconOptions;
 import ol.style.Stroke;
 import ol.style.StrokeOptions;
 import ol.style.Style;
@@ -98,16 +103,13 @@ public final class MapUtil {
   private static String baseMapUid;
   private static Feature previousFeature;
 
-  private static HashSet<String> interestItems = new HashSet<>();
   private static EPSG epsg;
   private static Map map;
   private static EventBus eventBus;
-  static {
-    interestItems.add("pand.2087049");
-    interestItems.add("pand.7461654");
-    interestItems.add("pand.6831828");
-    interestItems.add("pand.2466756");
-  }
+  private static List<IsLayer<Layer>> infrastructure = new ArrayList<>();
+  private static ol.layer.Vector markerUnaffectedLayer;
+  private static ol.layer.Vector markerAffectedLayer;
+  private static ol.layer.Vector markerSelectedLayer;
 
   private MapUtil() {}
 
@@ -160,8 +162,70 @@ public final class MapUtil {
     return new WmtsTileGrid(wmtsTileGridOptions);
   }
 
-  private static boolean isInterest(final String id) {
-    return interestItems.contains(id);
+  public static void prepareMarkersLayer(final String markerNotAffected, final String markerAffected, final String markerSelected) {
+    markerUnaffectedLayer = prepareMarkersLayer("not-affected", markerNotAffected);
+    markerAffectedLayer = prepareMarkersLayer("affected", markerAffected);
+    markerSelectedLayer = prepareMarkersLayer("selected", markerSelected);
+  }
+
+  public static void drawAffectedSources(final List<Point> points) {
+    final List<Feature> markers = new ArrayList<>();
+
+    points.forEach(v -> markers.add(createMarker(v)));
+
+    // Create source
+    final VectorOptions vectorSourceOptions = OLFactory.createOptions();
+    vectorSourceOptions.setFeatures(markers.toArray(new Feature[markers.size()]));
+    final Vector vectorSource = new Vector(vectorSourceOptions);
+    markerAffectedLayer.setSource(vectorSource);
+  }
+
+  public static void drawNotAffectedSources(final List<Point> points) {
+    final List<Feature> markers = new ArrayList<>();
+
+    points.forEach(v -> markers.add(createMarker(v)));
+
+    // Create source
+    final VectorOptions vectorSourceOptions = OLFactory.createOptions();
+    vectorSourceOptions.setFeatures(markers.toArray(new Feature[markers.size()]));
+    final Vector vectorSource = new Vector(vectorSourceOptions);
+    markerUnaffectedLayer.setSource(vectorSource);
+  }
+
+  public static Feature createMarker(final Point value) {
+    final Coordinate coordinate = OLFactory.createCoordinate(value.getX(), value.getY());
+    final ol.geom.Point point = new ol.geom.Point(coordinate);
+    final FeatureOptions featureOptions = OLFactory.createOptions();
+    featureOptions.setGeometry(point);
+    return new Feature(featureOptions);
+  }
+
+  private static ol.layer.Vector prepareMarkersLayer(final String name, final String src) {
+    // create style
+    final StyleOptions styleOptions = new StyleOptions();
+
+    final IconOptions notAffectedIconOptions = new IconOptions();
+    notAffectedIconOptions.setSrc(src);
+    notAffectedIconOptions.setSnapToPixel(true);
+    notAffectedIconOptions.setAnchor(new double[] { 0.5, 1 });
+    // iconOptions.setImgSize(OLFactory.createSize(40, 20));
+    final Icon icon = new Icon(notAffectedIconOptions);
+    styleOptions.setImage(icon);
+
+    final Style style = new Style(styleOptions);
+
+    final VectorLayerOptions vectorLayerOptions = OLFactory.createOptions();
+    vectorLayerOptions.setStyle(style);
+
+    final ol.layer.Vector layer = new ol.layer.Vector(vectorLayerOptions);
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    final OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    return layer;
   }
 
   public static IsLayer<Layer> prepareWFSBAGLayer() {
@@ -192,18 +256,53 @@ public final class MapUtil {
   }
 
   public static void loadInfrastructureLayers() {
-    GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addLayer("HWN", f, getHwnStyle()));
-    GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addLayer("OWN", f, getOwnStyle()));
-    GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addLayer("puntbronnen", f, getPuntBronStyle()));
-    GeoJsonRetrievalUtil.getGeoJson("res/json/schermen.geojson", f -> addLayer("schermen", f, getSchermenStyle()));
-    GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addLayer("spoorbaan", f, getSpoorbaanStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN", f, getHwnStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN", f, getOwnStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/schermen.geojson", f -> addInfrastructureLayer("schermen", f, getSchermenStyle()));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getSpoorbaanStyle()));
+  }
+
+  public static void hideInfrastructureLayers() {
+    for (final IsLayer<Layer> lyr : infrastructure) {
+      eventBus.fireEvent(new LayerHiddenCommand(lyr));
+    }
   }
 
   public static void loadBuildings() {
-    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing.geojson", f -> addHighlightLayer("buildings", f));
+    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing.geojson", f -> addBackgroundLayer("buildings", f));
   }
 
-  private static void addHighlightLayer(String name, Feature[] features) {
+  private static void addBackgroundLayer(final String name, final Feature[] features) {
+    final Vector lyrSource = new Vector();
+    final VectorLayerOptions lyrOptions = new VectorLayerOptions();
+    lyrOptions.setSource(lyrSource);
+    final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
+    layer.setStyle(getBAGStyle());
+
+    lyrSource.addFeatures(features);
+
+    final FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
+    featureOptions.setLayerFilter(v -> v.equals(layer));
+
+    map.addMapZoomListener(e -> {
+      if (e.getMap().getView().getZoom() < 12) {
+        layer.setVisible(false);
+      } else {
+        layer.setVisible(true);
+      }
+    });
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    final OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing_filtered.geojson", f -> addHighlightLayer("buildings_filtered", f));
+  }
+
+  private static void addHighlightLayer(final String name, final Feature[] features) {
     // create a vector layer
     final Vector overlaySource = new Vector();
     final VectorLayerOptions overlayLayerOptions = new VectorLayerOptions();
@@ -219,7 +318,7 @@ public final class MapUtil {
 
     lyrSource.addFeatures(features);
 
-    FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
+    final FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
     featureOptions.setLayerFilter(v -> v.equals(layer));
 
     map.addPointerMoveListener(e -> {
@@ -240,21 +339,13 @@ public final class MapUtil {
       }
     });
 
-    map.addMapZoomListener(e -> {
-      if (e.getMap().getView().getZoom() < 12) {
-        layer.setVisible(false);
-      } else {
-        layer.setVisible(true);
-      }
-    });
-
     final LayerInfo info = new LayerInfo();
     info.setTitle(name);
 
-    OL3Layer lyr = wrap(layer, info);
+    final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
 
-    OL3Layer overlyr = wrap(overlayLayer, info);
+    final OL3Layer overlyr = wrap(overlayLayer, info);
     eventBus.fireEvent(new LayerAddedCommand(overlyr));
   }
 
@@ -313,7 +404,7 @@ public final class MapUtil {
     return new Style(options);
   }
 
-  private static void addLayer(String name, Feature[] f, Style style) {
+  private static void addInfrastructureLayer(final String name, final Feature[] f, final Style style) {
     final Vector lyrSource = new Vector();
     final VectorLayerOptions lyrOptions = new VectorLayerOptions();
     lyrOptions.setSource(lyrSource);
@@ -325,11 +416,13 @@ public final class MapUtil {
     final LayerInfo info = new LayerInfo();
     info.setTitle(name);
 
-    OL3Layer lyr = wrap(layer, info);
+    final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    infrastructure.add(lyr);
   }
 
-  private static void selectFeature(Feature feature) {
+  private static void selectFeature(final Feature feature) {
     eventBus.fireEvent(new SelectFeatureEvent(feature));
     // int id = Integer.parseInt(feature.get("ELMID"));
     // GWT.log("Selecint feature: " + feature.getGeometryName());
@@ -593,7 +686,7 @@ public final class MapUtil {
     return baseMapUid;
   }
 
-  public static void setEventBus(EventBus eventBus) {
+  public static void setEventBus(final EventBus eventBus) {
     MapUtil.eventBus = eventBus;
   }
 }

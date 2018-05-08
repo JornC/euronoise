@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
 import nl.yogh.aerius.wui.domain.RoadEmission;
-import nl.yogh.aerius.wui.euronoise.event.HighlightRoadEvent;
+import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
 import nl.yogh.aerius.wui.resources.R;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.SwitchPanel;
@@ -70,8 +70,11 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   private void setCompensationMeasures(final RoadEmission value) {
     compensationPanel.setVisible(value != null);
+    if (value == null) {
+      return;
+    }
 
-    eventBus.fireEvent(new HighlightRoadEvent(value.getName()));
+    eventBus.fireEvent(new RoadHighlightEvent(value.getName()));
   }
 
   @UiHandler("rails")
