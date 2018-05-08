@@ -1,0 +1,55 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
+  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:wt="urn:import:nl.yogh.gwt.wui.widget.table">
+  <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
+  <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
+  <ui:style>
+    .name {
+
+    }
+    .header {
+    padding: 10px;
+    }
+    .value {
+    text-align: right;
+    width: 100px;
+    }
+    .unit {
+    text-align: right;
+    }
+    .row {
+    padding: 10px;
+    transition: all 0.15s
+    ease-out;
+    cursor: pointer;
+    user-select: none;
+    }
+    .row:hover {
+    background: #e1710d11;
+    color: #e1710d;
+    }
+    .row:active {
+    background: #e1710dcc !important;
+    color: white;
+    }
+    .selected {
+    background: #e1710d !important;
+    color: white !important;
+    }
+  </ui:style>
+  <wt:SimpleInteractiveClickDivTable ui:field="divTable" rowStyle="{style.row} {res.css.flex}" selectedStyle="{style.selected}">
+    <wt:header>
+      <g:FlowPanel styleName="{res.css.flex} {style.header}">
+        <g:Label styleName="{res.css.grow}" text="Option" />
+        <g:Label styleName="{res.css.grow} {style.unit}" text="Effect" />
+      </g:FlowPanel>
+    </wt:header>
+    <wt:column>
+      <wt:NameColumn cellStyle="{style.name} {res.css.grow}" />
+    </wt:column>
+    <wt:column>
+      <wt:TextColumn ui:field="emissionColumn" cellStyle="{style.value}" />
+    </wt:column>
+  </wt:SimpleInteractiveClickDivTable>
+</ui:UiBinder>
+ 

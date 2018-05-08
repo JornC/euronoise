@@ -1,0 +1,49 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
+  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:s="urn:import:nl.yogh.aerius.wui.euronoise.ui.start">
+  <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
+  <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
+  <ui:style type="nl.yogh.aerius.wui.euronoise.ui.start.CompensationPanel.CustomStyle">
+    .tabPanel {
+
+    }
+    .tab {
+    padding: 20px;
+    flex-basis: 50%;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.15s ease-out;
+    border-top: 1px solid white;
+    border-bottom: 1px solid black;
+    box-sizing: content-box;
+    }
+    .tab:hover {
+    color: #e1710d;
+    }
+    .selected {
+    color: #e1710d;
+    }
+    .leftTab {
+    border-right: 1px solid black;
+    }
+    .selected.tab {
+    border-top: 1px solid black;
+    border-bottom: 1px solid white;
+    }
+    .subPanel {
+    margin-top: 20px;
+    }
+  </ui:style>
+  <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {res.css.columns}">
+    <g:FlowPanel styleName="{style.tabPanel} {res.css.flex} {res.css.grow}">
+      <g:Label text="Overload" styleName="{style.tab} {style.leftTab}" ui:field="leftTab" />
+      <g:Label text="Compensation" styleName="{style.tab}" ui:field="rightTab" />
+    </g:FlowPanel>
+    <w:SwitchPanel ui:field="switchPanel">
+      <s:RoadsOverloadTable addStyleNames="{style.subPanel}" />
+      <s:RoadsMeasureTable addStyleNames="{style.subPanel}" />
+    </w:SwitchPanel>
+  </g:FlowPanel>
+</ui:UiBinder>
+ 

@@ -6,6 +6,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -15,6 +16,8 @@ import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
+import nl.yogh.aerius.wui.domain.RoadEmission;
+import nl.yogh.aerius.wui.euronoise.event.HighlightRoadEvent;
 import nl.yogh.aerius.wui.resources.R;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.SwitchPanel;
@@ -48,36 +51,36 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   @UiField SwitchPanel contentSwitchPanel;
 
+  @UiField RoadsDataTable roadsData;
+
+  @UiField CompensationPanel compensationPanel;
+
   public StartViewImpl() {
     initWidget(UI_BINDER.createAndBindUi(this));
 
-    railsButton.getElement()
-        .getStyle()
-        .setProperty("WebkitMaskImage", "url(" + R.images().sourceTrain().getSafeUri()
-            .asString() + ")");
-    roadsButton.getElement()
-        .getStyle()
-        .setProperty("WebkitMaskImage", "url(" + R.images().sourceRoad().getSafeUri()
-            .asString() + ")");
-    industryButton.getElement()
-        .getStyle()
-        .setProperty("WebkitMaskImage", "url(" + R.images().sourceIndustry().getSafeUri()
-            .asString() + ")");
-    airTrafficButton.getElement()
-        .getStyle()
-        .setProperty("WebkitMaskImage", "url(" + R.images().sourceAirTraffic().getSafeUri()
-            .asString() + ")");
+    railsButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceTrain().getSafeUri().asString() + ")");
+    roadsButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceRoad().getSafeUri().asString() + ")");
+    industryButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceIndustry().getSafeUri().asString() + ")");
+    airTrafficButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceAirTraffic().getSafeUri().asString() + ")");
 
     selectRoads();
+
+    roadsData.addValueChangeHandler(e -> setCompensationMeasures(e.getValue()));
+  }
+
+  private void setCompensationMeasures(final RoadEmission value) {
+    compensationPanel.setVisible(value != null);
+
+    eventBus.fireEvent(new HighlightRoadEvent(value.getName()));
   }
 
   @UiHandler("rails")
-  public void onRailsClick(ClickEvent e) {
+  public void onRailsClick(final ClickEvent e) {
     contentSwitchPanel.showWidget(0);
     select(rails);
   }
 
-  private void select(Panel selection) {
+  private void select(final Panel selection) {
     if (selected != null) {
       selected.removeStyleName(style.selected());
     }
@@ -87,7 +90,7 @@ public class StartViewImpl extends EventComposite implements StartView {
   }
 
   @UiHandler("roads")
-  public void onRoadsClick(ClickEvent e) {
+  public void onRoadsClick(final ClickEvent e) {
     selectRoads();
   }
 
@@ -100,12 +103,12 @@ public class StartViewImpl extends EventComposite implements StartView {
   public void setPresenter(final Presenter presenter) {}
 
   @EventHandler
-  public void onFeatureSelectionEvent(SelectFeatureEvent e) {
+  public void onFeatureSelectionEvent(final SelectFeatureEvent e) {
     switchPanel.showWidget(0);
   }
 
   @Override
-  public void setEventBus(EventBus eventBus) {
+  public void setEventBus(final EventBus eventBus) {
     super.setEventBus(eventBus);
 
     EVENT_BINDER.bindEventHandlers(this, eventBus);
