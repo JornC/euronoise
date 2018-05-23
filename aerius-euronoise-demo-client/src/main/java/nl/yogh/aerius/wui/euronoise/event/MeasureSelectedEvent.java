@@ -1,4 +1,4 @@
-package nl.yogh.aerius.wui.euronoise.ui.start;
+package nl.yogh.aerius.wui.euronoise.event;
 
 import java.util.Set;
 

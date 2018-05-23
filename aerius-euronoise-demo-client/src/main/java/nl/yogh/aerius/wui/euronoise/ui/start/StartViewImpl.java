@@ -1,6 +1,7 @@
 package nl.yogh.aerius.wui.euronoise.ui.start;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -17,7 +18,11 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
 import nl.yogh.aerius.wui.domain.RoadEmission;
+import nl.yogh.aerius.wui.euronoise.event.ResultValueSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowIndustryEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowRailsEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowRoadsEvent;
 import nl.yogh.aerius.wui.resources.R;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.SwitchPanel;
@@ -39,6 +44,7 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   @UiField FocusPanel roads;
   @UiField FocusPanel rails;
+  @UiField FocusPanel industry;
 
   @UiField CustomStyle style;
 
@@ -70,17 +76,28 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   private void setCompensationMeasures(final RoadEmission value) {
     compensationPanel.setVisible(value != null);
-    if (value == null) {
-      return;
-    }
 
-    eventBus.fireEvent(new RoadHighlightEvent(value.getName()));
+    eventBus.fireEvent(new RoadHighlightEvent(value != null ? value.getName() : ""));
+    eventBus.fireEvent(new ResultValueSelectedEvent(value != null && value.getName().equals("OWN") ? "OWN" : "A10_zonder"));
+
+    compensationPanel.reset();
   }
 
   @UiHandler("rails")
   public void onRailsClick(final ClickEvent e) {
     contentSwitchPanel.showWidget(0);
+    eventBus.fireEvent(new ResultValueSelectedEvent("Railverk"));
     select(rails);
+    
+    eventBus.fireEvent(new ShowRailsEvent());
+  }
+
+  @UiHandler("industry")
+  public void onIndustryClick(final ClickEvent e) {
+    contentSwitchPanel.showWidget(2);
+    eventBus.fireEvent(new ResultValueSelectedEvent("Industrie"));
+    select(industry);
+    eventBus.fireEvent(new ShowIndustryEvent());
   }
 
   private void select(final Panel selection) {
@@ -95,6 +112,9 @@ public class StartViewImpl extends EventComposite implements StartView {
   @UiHandler("roads")
   public void onRoadsClick(final ClickEvent e) {
     selectRoads();
+    eventBus.fireEvent(new ResultValueSelectedEvent("A10_zonder"));
+    eventBus.fireEvent(new ShowRoadsEvent());
+    compensationPanel.reset();
   }
 
   private void selectRoads() {
@@ -108,6 +128,8 @@ public class StartViewImpl extends EventComposite implements StartView {
   @EventHandler
   public void onFeatureSelectionEvent(final SelectFeatureEvent e) {
     switchPanel.showWidget(0);
+
+    Scheduler.get().scheduleDeferred(() -> eventBus.fireEvent(new ShowRoadsEvent()));
   }
 
   @Override

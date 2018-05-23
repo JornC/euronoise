@@ -35,6 +35,8 @@ import nl.overheid.aerius.geo.BBox;
 import nl.overheid.aerius.geo.command.InfoLocationChangeCommand;
 import nl.overheid.aerius.geo.command.LayerAddedCommand;
 import nl.overheid.aerius.geo.command.LayerHiddenCommand;
+import nl.overheid.aerius.geo.command.LayerRemovedCommand;
+import nl.overheid.aerius.geo.command.LayerVisibleCommand;
 import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.domain.Point;
@@ -115,8 +117,8 @@ public final class MapUtil {
   private static final double DECIBELS_MAX = 67D;
 
   private static final String[] colors = new String[] { "#ffffe0", "#ffd59b", "#ffa474", "#f47461", "#db4551", "#b81b34", "#8b0000" };
-  private static boolean lowerValues;
   private static Vector resultLayerSource;
+  private static String resultValue;
 
   private MapUtil() {}
 
@@ -126,7 +128,7 @@ public final class MapUtil {
     viewOptions.setProjection(projection);
     final View view = new View(viewOptions);
 
-    final Coordinate centerCoordinate = OLFactory.createCoordinate(118128.36D,489157.2);
+    final Coordinate centerCoordinate = OLFactory.createCoordinate(118128.36D, 489157.2);
 
     view.setCenter(centerCoordinate);
     view.setZoom(12);
@@ -272,7 +274,30 @@ public final class MapUtil {
 
   public static void hideInfrastructureLayers() {
     for (final IsLayer<Layer> lyr : infrastructure) {
-      eventBus.fireEvent(new LayerHiddenCommand(lyr));
+      eventBus.fireEvent(new LayerRemovedCommand(lyr));
+    }
+  }
+
+  public static void showInfrastructureLayers(String name) {
+    hideInfrastructureLayers();
+
+    switch (name) {
+    case "Roads":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      break;
+    case "A10":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      break;
+    case "OWN":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      break;
+    case "Rail":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getHighlightSpoorbaanStyle()));
+      break;
+    default:
+
+      break;
     }
   }
 
@@ -312,7 +337,8 @@ public final class MapUtil {
   }
 
   private static String getProperGradientColor(final double decibels) {
-    return colors[Math.max(0, Math.min(colors.length - 1, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))];
+    return colors[Math.max(0,
+        Math.min(colors.length - 1, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))];
   }
 
   private static void addHighlightLayer(final String name, final Feature[] features) {
@@ -328,9 +354,9 @@ public final class MapUtil {
     lyrOptions.setSource(resultLayerSource);
     final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
     layer.setStyleFunction(object -> {
-      final Style bagStyle = getBAGStyle();
+      final Style bagStyle = getInteractiveBAGStyle();
 
-      final Object str = object.get(lowerValues ? "A10_metMa" : "A10_zonder");
+      final Object str = object.get(resultValue);
       if (str != null) {
         final double decibels = (Double) str;
         final String color = getProperGradientColor(decibels);
@@ -374,6 +400,39 @@ public final class MapUtil {
     eventBus.fireEvent(new LayerAddedCommand(overlyr));
   }
 
+  private static Style getHighlightedHwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(255, 113, 13, 0.8f));
+    strokeOptions.setWidth(8);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getHighlightedOwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(63, 169, 253, 0.8f));
+    strokeOptions.setWidth(8);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getHighlightSpoorbaanStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(204, 204, 0, 1f));
+    strokeOptions.setWidth(8);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
   private static Style getHwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(254, 11, 11, 1f));
@@ -387,7 +446,7 @@ public final class MapUtil {
 
   private static Style getOwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(255, 153, 51, 1f));
+    strokeOptions.setColor(new Color(63, 169, 253, 1f));
     strokeOptions.setWidth(2);
 
     final StyleOptions options = OLFactory.createOptions();
@@ -556,13 +615,31 @@ public final class MapUtil {
     }
   }
 
+  private static Style getInteractiveBAGStyle() {
+    final FillOptions fillOptions = OLFactory.createOptions();
+    fillOptions.setColor(new Color(13, 176, 225, 0.3f));
+
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(57, 70, 70, 0.9f));
+    strokeOptions.setWidth(2);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setFill(new Fill(fillOptions));
+    options.setStroke(new Stroke(strokeOptions));
+    options.setZIndex(100);
+
+    final Style style = new Style(options);
+
+    return style;
+  }
+
   private static Style getBAGStyle() {
     final FillOptions fillOptions = OLFactory.createOptions();
     fillOptions.setColor(new Color(255, 255, 255, 0.5f));
 
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(57, 70, 70, 0.9f));
-    strokeOptions.setWidth(2);
+    strokeOptions.setWidth(0);
 
     final StyleOptions options = OLFactory.createOptions();
     options.setFill(new Fill(fillOptions));
@@ -716,8 +793,8 @@ public final class MapUtil {
     MapUtil.eventBus = eventBus;
   }
 
-  public static void setTriggerLowerValues(final boolean lowerValues) {
-    MapUtil.lowerValues = lowerValues;
+  public static void setResultValue(final String resultValue) {
+    MapUtil.resultValue = resultValue;
     resultLayerSource.refresh();
   }
 }

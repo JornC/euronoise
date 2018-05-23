@@ -60,4 +60,8 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
   public HandlerRegistration addValueChangeHandler(final ValueChangeHandler<Set<RoadMeasure>> handler) {
     return addHandler(handler, ValueChangeEvent.getType());
   }
+
+  public void reset() {
+    divTable.deselectAll();
+  }
 }

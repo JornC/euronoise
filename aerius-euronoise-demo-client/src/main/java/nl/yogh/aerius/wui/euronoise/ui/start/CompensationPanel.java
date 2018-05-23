@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 
 import nl.yogh.aerius.wui.domain.RoadMeasure;
+import nl.yogh.aerius.wui.euronoise.event.MeasureSelectedEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.SwitchPanel;
 
@@ -66,5 +67,9 @@ public class CompensationPanel extends EventComposite {
   @UiHandler("roadsMeasureTable")
   public void onRoadsMeasureTable(final ValueChangeEvent<Set<RoadMeasure>> e) {
     eventBus.fireEvent(new MeasureSelectedEvent(e.getValue()));
+  }
+
+  public void reset() {
+    roadsMeasureTable.reset();
   }
 }

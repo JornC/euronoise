@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:nl.yogh.gwt.wui.widget"
-  xmlns:p="urn:import:nl.yogh.aerius.wui.widget" xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:s="urn:import:nl.yogh.aerius.wui.euronoise.ui.start">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:nl.yogh.gwt.wui.widget" xmlns:p="urn:import:nl.yogh.aerius.wui.widget"
+  xmlns:c="urn:import:nl.yogh.aerius.wui.euronoise.component" xmlns:s="urn:import:nl.yogh.aerius.wui.euronoise.ui.start">
   <ui:with field='i18n' type='nl.yogh.aerius.wui.i18n.ApplicationMessages' />
   <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
   <ui:style type="nl.yogh.aerius.wui.euronoise.ui.start.StartViewImpl.CustomStyle">
@@ -55,7 +56,8 @@
     !important;
     }
     .item:active {
-    background: #cecece;
+    background:
+    #cecece;
     }
     .menu {
     height: 100px;
@@ -68,7 +70,8 @@
     pointer-events: none;
     }
     .disabled > .icon {
-    background: #aaa !important;
+    background: #aaa
+    !important;
     }
     .disabled > .label {
     color: #aaa
@@ -84,11 +87,14 @@
     .compensationPanel {
     margin-top: 40px;
     }
+    .hip {
+    margin: 10px;
+    }
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {style.panel}">
     <w:SwitchPanel ui:field="switchPanel" styleName="{res.css.flex}">
       <g:FlowPanel styleName="{style.actualContent} {res.css.grow}">
-        <g:Label text="Noise load sources on this location" styleName="{style.text}" />
+        <g:Label text="Noise load sources at this location" styleName="{style.text}" />
         <g:FlowPanel styleName="{res.css.flex} {style.menu}">
           <g:FocusPanel ui:field="rails" styleName="{style.btn}">
             <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}">
@@ -102,25 +108,27 @@
               <g:Label text="Roads" styleName="{style.label}" />
             </g:FlowPanel>
           </g:FocusPanel>
-          <g:FocusPanel styleName="{style.btn}">
-            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.disabled}" ui:field="industry">
+          <g:FocusPanel ui:field="industry" styleName="{style.btn}">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}">
               <g:SimplePanel styleName="{style.icon}" ui:field="industryButton" />
               <g:Label text="Industry" styleName="{style.label}" />
             </g:FlowPanel>
           </g:FocusPanel>
           <g:FocusPanel styleName="{style.btn}">
-            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.disabled}" ui:field="airTraffic">
+            <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter} {style.disabled}"
+              ui:field="airTraffic">
               <g:SimplePanel styleName="{style.icon}" ui:field="airTrafficButton" />
               <g:Label text="Air traffic" styleName="{style.label}" />
             </g:FlowPanel>
           </g:FocusPanel>
         </g:FlowPanel>
         <w:SwitchPanel ui:field="contentSwitchPanel" styleName="{style.content}">
-          <g:Label text="trains" />
+          <g:Label text="Trains" styleName="{style.hip}" />
           <g:FlowPanel>
             <s:RoadsDataTable ui:field="roadsData" />
             <s:CompensationPanel ui:field="compensationPanel" addStyleNames="{style.compensationPanel}" visible="false" />
           </g:FlowPanel>
+          <g:Label text="Industry" styleName="{style.hip}" />
         </w:SwitchPanel>
       </g:FlowPanel>
     </w:SwitchPanel>

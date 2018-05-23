@@ -31,8 +31,12 @@ import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
+import nl.yogh.aerius.wui.euronoise.event.MeasureSelectedEvent;
+import nl.yogh.aerius.wui.euronoise.event.ResultValueSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
-import nl.yogh.aerius.wui.euronoise.ui.start.MeasureSelectedEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowIndustryEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowRailsEvent;
+import nl.yogh.aerius.wui.euronoise.event.ShowRoadsEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 
 public class MapViewImpl extends EventComposite implements MapView {
@@ -101,17 +105,37 @@ public class MapViewImpl extends EventComposite implements MapView {
   public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
     MapUtil.hideInfrastructureLayers();
 
-    //    MapUtil.displayMarkers();
+    // MapUtil.displayMarkers();
+  }
+  
+  @EventHandler
+  public void onSelectRails(ShowRailsEvent e) {
+    MapUtil.showInfrastructureLayers("Rail");
+  }
+  
+  @EventHandler
+  public void onSelectIndustry(ShowIndustryEvent e) {
+    MapUtil.showInfrastructureLayers("");
+  }
+  
+  @EventHandler
+  public void onSelectRoads(ShowRoadsEvent e) {
+    MapUtil.showInfrastructureLayers("Roads");
   }
 
   @EventHandler
   public void onSelectRoad(final RoadHighlightEvent e) {
-    GWT.log("Gotta highlight road: " + e.getValue());
+    MapUtil.showInfrastructureLayers(e.getValue());
   }
 
   @EventHandler
   public void onMeasureSelected(final MeasureSelectedEvent e) {
-    MapUtil.setTriggerLowerValues(!e.getValue().isEmpty());
+    MapUtil.setResultValue(e.getValue().isEmpty() ? "A10_zonder" : "A10_metMa");
+  }
+
+  @EventHandler
+  public void onResultTypeSelected(final ResultValueSelectedEvent e) {
+    MapUtil.setResultValue(e.getValue());
   }
 
   public void showBuildings() {
