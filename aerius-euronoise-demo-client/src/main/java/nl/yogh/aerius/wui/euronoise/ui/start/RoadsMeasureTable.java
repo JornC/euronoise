@@ -19,7 +19,7 @@ import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.table.SimpleInteractiveClickDivTable;
 import nl.yogh.gwt.wui.widget.table.TextColumn;
 
-public class RoadsMeasureTable extends EventComposite implements HasValueChangeHandlers<Set<RoadMeasure>> {
+public class RoadsMeasureTable extends EventComposite implements HasValueChangeHandlers<RoadMeasure> {
   private static final RoadsMeasureTableUiBinder UI_BINDER = GWT.create(RoadsMeasureTableUiBinder.class);
 
   interface RoadsMeasureTableUiBinder extends UiBinder<Widget, RoadsMeasureTable> {}
@@ -37,9 +37,9 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
     };
 
     initWidget(UI_BINDER.createAndBindUi(this));
-    divTable.setMultiSelectionModel();
+    divTable.setSingleSelectionModel();
     divTable.getSelectionModel().addSelectionChangeHandler(e -> {
-      ValueChangeEvent.fire(RoadsMeasureTable.this, ((MultiSelectionModel<RoadMeasure>) divTable.getSelectionModel()).getSelectedSet());
+      ValueChangeEvent.fire(RoadsMeasureTable.this, ((SingleSelectionModel<RoadMeasure>) divTable.getSelectionModel()).getSelectedObject());
     });
 
     voodoo();
@@ -57,7 +57,7 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
   }
 
   @Override
-  public HandlerRegistration addValueChangeHandler(final ValueChangeHandler<Set<RoadMeasure>> handler) {
+  public HandlerRegistration addValueChangeHandler(final ValueChangeHandler<RoadMeasure> handler) {
     return addHandler(handler, ValueChangeEvent.getType());
   }
 

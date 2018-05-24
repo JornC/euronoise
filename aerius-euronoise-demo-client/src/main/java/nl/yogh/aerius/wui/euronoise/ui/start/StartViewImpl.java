@@ -123,6 +123,7 @@ public class StartViewImpl extends EventComposite implements StartView {
     this.selected = null;
 
     eventBus.fireEvent(new ClearTabSelectionEvent());
+    contentSwitchPanel.hideWidget();
   }
 
   private void select(final Panel selection) {

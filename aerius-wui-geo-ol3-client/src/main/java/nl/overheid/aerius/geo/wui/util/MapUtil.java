@@ -292,11 +292,9 @@ public final class MapUtil {
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
-    case "A10_Noise barrier":
     case "A10":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       break;
-    case "OWN_Noise barrier":
     case "OWN":
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
@@ -307,10 +305,20 @@ public final class MapUtil {
       GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
       break;
     case "A10_Road surface ABC":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
       break;
     case "OWN_Road surface ABC":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
+      break;
+    case "A10_Noise barrier":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getBarrierHwnStyle()));
+      break;
+    case "OWN_Noise barrier":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getBarrierOwnStyle()));
       break;
     default:
 
@@ -457,8 +465,9 @@ public final class MapUtil {
   private static Style getABCHwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
-    strokeOptions.setWidth(10);
-    strokeOptions.setLineDashOffset(1);
+    strokeOptions.setWidth(4);
+    strokeOptions.setLineDashOffset(2);
+    strokeOptions.setLineDash(new int[] { 20, 20 });
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
@@ -469,8 +478,35 @@ public final class MapUtil {
   private static Style getABCOwnStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
-    strokeOptions.setWidth(10);
-    strokeOptions.setLineDashOffset(1);
+    strokeOptions.setWidth(4);
+    strokeOptions.setLineDashOffset(2);
+    strokeOptions.setLineDash(new int[] { 20, 20 });
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getBarrierHwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(74, 155, 239, 0.8f));
+    strokeOptions.setWidth(4);
+    strokeOptions.setLineDashOffset(2);
+    strokeOptions.setLineDash(new int[] { 20, 20 });
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getBarrierOwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(225, 72, 13, 0.8f));
+    strokeOptions.setWidth(4);
+    strokeOptions.setLineDashOffset(2);
+    strokeOptions.setLineDash(new int[] { 20, 20 });
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
@@ -585,8 +621,24 @@ public final class MapUtil {
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
 
-    GWT.log("Features: " + f.length);
-    GWT.log("Adding layerrr");
+    infrastructure.add(lyr);
+  }
+
+  private static void addRaisedInfrastructureLayer(final String name, final Feature[] f, final Style style) {
+    final Vector lyrSource = new Vector();
+    final VectorLayerOptions lyrOptions = new VectorLayerOptions();
+    lyrOptions.setSource(lyrSource);
+    final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
+    layer.setStyle(style);
+    layer.setZIndex(1002);
+
+    lyrSource.addFeatures(f);
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    final OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
 
     infrastructure.add(lyr);
   }

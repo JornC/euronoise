@@ -151,17 +151,17 @@ public class MapViewImpl extends EventComposite implements MapView {
       showGeneralizedRoad();
     } else {
       MapUtil.showInfrastructureLayers(e.getValue());
-      vanillaRoad = e.getValue().equals("OWN") ? "OWN" : "A10";
+      vanillaRoad = e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10";
       eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10_zonder"));
     }
   }
 
   @EventHandler
   public void onMeasureSelected(final MeasureSelectedEvent e) {
-    MapUtil.setResultValue(e.getValue().isEmpty() ? "A10_zonder" : "A10_metMa");
+    MapUtil.setResultValue(e.getValue() == null ? "A10_zonder" : "A10_metMa");
 
-    if (!e.getValue().isEmpty()) {
-      MapUtil.showInfrastructureLayers(vanillaRoad + "_" + e.getValue().iterator().next().getName());
+    if (e.getValue() != null) {
+      MapUtil.showInfrastructureLayers(vanillaRoad + "_" + e.getValue().getName());
     } else {
       MapUtil.showInfrastructureLayers(vanillaRoad);
     }
