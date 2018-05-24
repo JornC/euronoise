@@ -115,11 +115,15 @@ public final class MapUtil {
 
   private static final double DECIBELS_MIN = 55D;
   private static final double DECIBELS_MAX = 67D;
+  private static final double ISO_MIN = 49D;
+  private static final double ISO_MAX = 69D;
 
+  private static final String[] iso = new String[] { "#E5E30088", "#D89E0088", "#CB610088", "#BF290088" };
   private static final String[] colors = new String[] { "#ffffe0", "#ffd59b", "#ffa474", "#f47461", "#db4551", "#b81b34", "#8b0000" };
   private static Vector resultLayerSource;
   private static String resultValue;
   private static boolean interactionEnabled;
+  private static boolean showIsoLines;
 
   private MapUtil() {}
 
@@ -271,9 +275,47 @@ public final class MapUtil {
     GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
     GeoJsonRetrievalUtil.getGeoJson("res/json/schermen.geojson", f -> addInfrastructureLayer("schermen", f, getSchermenStyle()));
     GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getSpoorbaanStyle()));
-    // GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER.geojson", f -> addInfrastructureLayer("GELUID_VERKEER", f, getBAGStyle()));
 
     GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing_filtered.geojson", f -> addHighlightLayer("buildings_filtered", f));
+  }
+
+  private static void addIsoLayer(final String name, final Feature[] f, final String subType) {
+    final Vector lyrSource = new Vector();
+    final VectorLayerOptions lyrOptions = new VectorLayerOptions();
+    lyrOptions.setSource(lyrSource);
+    final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
+    layer.setStyleFunction(object -> {
+      final Style bagStyle = getBAGStyle();
+
+      final Double decibels = Double.parseDouble(object.get("SELECTIE"));
+      if (decibels != null) {
+        final String color = getProperIsoColor(decibels);
+        final Color colorFromString = Color.getColorFromString(color);
+        bagStyle.getFill().setColor(colorFromString);
+      }
+
+      return new Style[] { bagStyle };
+    });
+
+    for (final Feature feat : f) {
+      final String soort = feat.get("SOORT");
+      GWT.log(soort + " > " + subType);
+      final boolean matchesSubType = soort.equals(subType);
+      if (!matchesSubType) {
+        continue;
+      }
+
+      lyrSource.addFeature(feat);
+    }
+    layer.setZIndex(900);
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle(name);
+
+    final OL3Layer lyr = wrap(layer, info);
+    eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    infrastructure.add(lyr);
   }
 
   public static void hideInfrastructureLayers() {
@@ -289,34 +331,50 @@ public final class MapUtil {
 
     switch (name) {
     case "Road":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
     case "A10":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       break;
     case "OWN":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
     case "Rail":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "TREINMETRO_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getHighlightSpoorbaanStyle()));
       break;
     case "Industry":
       GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
       break;
     case "A10_Road surface ABC":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
       break;
     case "OWN_Road surface ABC":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
       break;
     case "A10_Noise barrier":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getBarrierHwnStyle()));
       break;
     case "OWN_Noise barrier":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
+          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getBarrierOwnStyle()));
       break;
@@ -358,6 +416,10 @@ public final class MapUtil {
 
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
+  }
+
+  private static String getProperIsoColor(final double decibels) {
+    return iso[Math.max(0, Math.min(iso.length - 1, (int) Math.round((decibels - ISO_MIN) / (ISO_MAX - ISO_MIN) * iso.length)))];
   }
 
   private static String getProperGradientColor(final double decibels) {
@@ -436,8 +498,6 @@ public final class MapUtil {
 
   private static Double determineDecibels(final Feature object, final String resultValue) {
     Double decibels = null;
-
-    GWT.log("Showing decibels for " + resultValue);
 
     switch (resultValue) {
     case "A10_zonder":
@@ -612,6 +672,7 @@ public final class MapUtil {
     lyrOptions.setSource(lyrSource);
     final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
     layer.setStyle(style);
+    layer.setZIndex(999);
 
     lyrSource.addFeatures(f);
 
@@ -945,5 +1006,9 @@ public final class MapUtil {
 
   public static void setInteractionEnabled(final boolean interactionEnabled) {
     MapUtil.interactionEnabled = interactionEnabled;
+  }
+
+  public static void showIsoLines() {
+    showIsoLines = true;
   }
 }

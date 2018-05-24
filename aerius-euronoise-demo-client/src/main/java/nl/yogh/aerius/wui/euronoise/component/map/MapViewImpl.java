@@ -112,6 +112,7 @@ public class MapViewImpl extends EventComposite implements MapView {
     MapUtil.setInteractionEnabled(true);
     MapUtil.hideInfrastructureLayers();
     MapUtil.setResultValue("");
+    MapUtil.showIsoLines();
 
     // MapUtil.displayMarkers();
   }
@@ -150,8 +151,8 @@ public class MapViewImpl extends EventComposite implements MapView {
     if (e.getValue() == null) {
       showGeneralizedRoad();
     } else {
-      MapUtil.showInfrastructureLayers(e.getValue());
       vanillaRoad = e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10";
+      MapUtil.showInfrastructureLayers(vanillaRoad);
       eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10_zonder"));
     }
   }
