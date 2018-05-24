@@ -17,7 +17,9 @@
 package nl.overheid.aerius.geo.wui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
@@ -31,6 +33,7 @@ import nl.overheid.aerius.geo.command.LayerOpacityCommand;
 import nl.overheid.aerius.geo.command.LayerRemovedCommand;
 import nl.overheid.aerius.geo.command.LayerVisibleCommand;
 import nl.overheid.aerius.geo.domain.IsLayer;
+import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.epsg.EPSG;
 import nl.overheid.aerius.geo.util.ReceptorUtil;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
@@ -50,7 +53,12 @@ public class MapLayoutPanel implements HasEventBus {
   private EventBus eventBus;
   private final ReceptorUtil receptorUtil;
 
-  private List<Layer> deferred = new ArrayList<>();
+  private final List<Layer> deferredBase = new ArrayList<>();
+  private final List<Layer> deferred = new ArrayList<>();
+
+  private final Set<LayerInfo> layers = new HashSet<>();
+
+  private IsLayer<Layer> baseLayer;
 
   @Inject
   public MapLayoutPanel(final EPSG epsg, final ReceptorUtil receptorUtil) {
@@ -76,26 +84,42 @@ public class MapLayoutPanel implements HasEventBus {
     map = MapUtil.prepareMap(uniqueId, projection);
 
     // Base layer preparation. COMMAND OR EVENT!?
-    final IsLayer<Layer> baseLayer = MapUtil.prepareBaseLayer(map, projection, epsg);
+    baseLayer = MapUtil.preparePhotoLayer(map, projection, epsg);
     eventBus.fireEvent(new LayerAddedCommand(baseLayer));
 
     MapUtil.prepareControls(map);
 
     // TODO Move this elsewhere and add through event (non-interactive, top-layer)
     MapUtil.prepareInformationLayer(map, projection, eventBus, receptorUtil);
-    
+
     completeDeferred();
   }
 
+  public void switchToGrayscaleLayer() {
+    eventBus.fireEvent(new LayerRemovedCommand(baseLayer));
+
+    // Base layer preparation. COMMAND OR EVENT!?
+    baseLayer = MapUtil.prepareBaseLayer(map, Projection.get(epsg.getEpsgCode()), epsg);
+    eventBus.fireEvent(new LayerAddedCommand(baseLayer, true));
+  }
+
   private void completeDeferred() {
-    for (Layer l : deferred) {
+    for (final Layer l : deferredBase) {
+      addBaseLayer(l);
+    }
+
+    for (final Layer l : deferred) {
       addLayer(l);
     }
   }
 
   @EventHandler
   void onLayerAddedCommand(final LayerAddedCommand c) {
-    finishCommand(c, addLayer(c.getIsLayer()));
+    if (c.isBase()) {
+      finishCommand(c, addBaseLayer(c.getIsLayer()));
+    } else {
+      finishCommand(c, addLayer(c.getIsLayer()));
+    }
   }
 
   @EventHandler
@@ -131,14 +155,36 @@ public class MapLayoutPanel implements HasEventBus {
   /**
    * To be used only as a delegate method from a command handler and not directly.
    */
+  private boolean addBaseLayer(final IsLayer<Layer> layer) {
+    final boolean add = layers.add(layer.getInfo());
+
+    if (add) {
+      return addBaseLayer(layer.asLayer());
+    } else {
+      GWT.log("NOT ADDING!");
+      return add;
+    }
+  }
+
+  /**
+   * To be used only as a delegate method from a command handler and not directly.
+   */
   private boolean addLayer(final IsLayer<Layer> layer) {
-    return addLayer(layer.asLayer());
+    final boolean add = layers.add(layer.getInfo());
+
+    if (add) {
+      return addLayer(layer.asLayer());
+    } else {
+      GWT.log("NOT ADDING!");
+      return add;
+    }
   }
 
   /**
    * To be used only as a delegate method from a command handler and not directly.
    */
   private boolean removeLayer(final IsLayer<Layer> layer) {
+    layers.remove(layer.getInfo());
     return removeLayer(layer.asLayer());
   }
 
@@ -162,20 +208,39 @@ public class MapLayoutPanel implements HasEventBus {
   /**
    * To be used only as a delegate method from an command handler and not directly.
    */
+  private boolean addBaseLayer(final Layer layer) {
+    if (map == null) {
+      deferAddBaseLayer(layer);
+      return false;
+    }
+
+    map.getLayers().insertAt(0, layer);
+
+    // TODO Implement action indication
+    return true;
+  }
+
+  /**
+   * To be used only as a delegate method from an command handler and not directly.
+   */
   private boolean addLayer(final Layer layer) {
     if (map == null) {
       deferAddLayer(layer);
       return false;
     }
-    
+
     map.addLayer(layer);
 
     // TODO Implement action indication
     return true;
   }
 
-  private void deferAddLayer(Layer layer) {
+  private void deferAddLayer(final Layer layer) {
     deferred.add(layer);
+  }
+
+  private void deferAddBaseLayer(final Layer layer) {
+    deferredBase.add(layer);
   }
 
   /**

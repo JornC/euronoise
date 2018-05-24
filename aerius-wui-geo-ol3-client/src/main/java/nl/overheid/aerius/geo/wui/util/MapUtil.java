@@ -114,16 +114,17 @@ public final class MapUtil {
   private static ol.layer.Vector markerSelectedLayer;
 
   private static final double DECIBELS_MIN = 55D;
-  private static final double DECIBELS_MAX = 67D;
-  private static final double ISO_MIN = 49D;
-  private static final double ISO_MAX = 69D;
+  private static final double DECIBELS_MAX = 70D;
+  private static final double ISO_MIN = 50D;
+  private static final double ISO_MAX = 70D;
 
-  private static final String[] iso = new String[] { "#E5E30088", "#D89E0088", "#CB610088", "#BF290088" };
+  private static final String[] iso = new String[] { "#f7f56bdd", "#f4a46ddd", "#eb6268dd", "#a24b88dd" };
   private static final String[] colors = new String[] { "#ffffe0", "#ffd59b", "#ffa474", "#f47461", "#db4551", "#b81b34", "#8b0000" };
   private static Vector resultLayerSource;
   private static String resultValue;
   private static boolean interactionEnabled;
   private static boolean showIsoLines;
+  private static OL3Layer isoLayer;
 
   private MapUtil() {}
 
@@ -287,7 +288,7 @@ public final class MapUtil {
     layer.setStyleFunction(object -> {
       final Style bagStyle = getBAGStyle();
 
-      final Double decibels = Double.parseDouble(object.get("SELECTIE"));
+      final Integer decibels = Integer.parseInt(object.get("SELECTIE"));
       if (decibels != null) {
         final String color = getProperIsoColor(decibels);
         final Color colorFromString = Color.getColorFromString(color);
@@ -299,7 +300,6 @@ public final class MapUtil {
 
     for (final Feature feat : f) {
       final String soort = feat.get("SOORT");
-      GWT.log(soort + " > " + subType);
       final boolean matchesSubType = soort.equals(subType);
       if (!matchesSubType) {
         continue;
@@ -315,7 +315,18 @@ public final class MapUtil {
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
 
+    MapUtil.isoLayer = lyr;
     infrastructure.add(lyr);
+  }
+
+  public static void hideInfrastructureLayers(final List<String> exceptions) {
+    for (final IsLayer<Layer> lyr : infrastructure) {
+      if (exceptions.contains(lyr.getInfo().getTitle())) {
+        continue;
+      }
+
+      eventBus.fireEvent(new LayerRemovedCommand(lyr));
+    }
   }
 
   public static void hideInfrastructureLayers() {
@@ -325,62 +336,61 @@ public final class MapUtil {
   }
 
   public static void showInfrastructureLayers(final String name) {
-    hideInfrastructureLayers();
-
-    GWT.log("Showing infrastructure: " + name);
+    final List<String> exceptions = new ArrayList<>();
 
     switch (name) {
     case "Road":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      except(exceptions, "HWN-highlight", "OWN-highlight");
       break;
     case "A10":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      except(exceptions, "HWN-highlight");
       break;
     case "OWN":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      except(exceptions, "OWN-highlight");
       break;
     case "Rail":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "TREINMETRO_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getHighlightSpoorbaanStyle()));
+      except(exceptions, "ISO_METRO", "spoorbaan");
       break;
     case "Industry":
       GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
+      except(exceptions, "puntbronnen");
       break;
     case "A10_Road surface ABC":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
+      except(exceptions, "HWN-highlight", "HWN-abc");
       break;
     case "OWN_Road surface ABC":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
+      except(exceptions, "OWN-highlight", "OWN-abc");
       break;
     case "A10_Noise barrier":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getBarrierHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-barrier", f, getBarrierHwnStyle()));
+      except(exceptions, "HWN-highlight", "HWN-barrier");
       break;
     case "OWN_Noise barrier":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson",
-          f -> addIsoLayer("GELUID_VERKEER_SELECTIE_RD", f, "WEGTRAM_LDEN"));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getBarrierOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-barrier", f, getBarrierOwnStyle()));
+      except(exceptions, "OWN-highlight", "OWN-barrier");
       break;
     default:
 
       break;
+    }
+
+    hideInfrastructureLayers(exceptions);
+  }
+
+  private static void except(final List<String> lst, final String... additions) {
+    for (final String add : additions) {
+      lst.add(add);
     }
   }
 
@@ -418,13 +428,14 @@ public final class MapUtil {
     eventBus.fireEvent(new LayerAddedCommand(lyr));
   }
 
-  private static String getProperIsoColor(final double decibels) {
-    return iso[Math.max(0, Math.min(iso.length - 1, (int) Math.round((decibels - ISO_MIN) / (ISO_MAX - ISO_MIN) * iso.length)))];
+  private static String getProperIsoColor(final int decibels) {
+    final int idx = Math.max(1, Math.min(iso.length, (int) Math.round((decibels - ISO_MIN) / (ISO_MAX - ISO_MIN) * iso.length))) - 1;
+    return iso[idx];
   }
 
   private static String getProperGradientColor(final double decibels) {
-    return colors[Math.max(0,
-        Math.min(colors.length - 1, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))];
+    return colors[Math.max(1, Math.min(colors.length, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))
+                  - 1];
   }
 
   private static void addHighlightLayer(final String name, final Feature[] features) {
@@ -489,10 +500,13 @@ public final class MapUtil {
     final LayerInfo info = new LayerInfo();
     info.setTitle(name);
 
+    final LayerInfo overlayInfo = new LayerInfo();
+    info.setTitle(name + "_overlay");
+
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
 
-    final OL3Layer overlyr = wrap(overlayLayer, info);
+    final OL3Layer overlyr = wrap(overlayLayer, overlayInfo);
     eventBus.fireEvent(new LayerAddedCommand(overlyr));
   }
 
@@ -733,7 +747,6 @@ public final class MapUtil {
 
   private static void getFeatures(final Map map, final Vector vectorSource, final EPSG epsg, final RequestBuilder requestBuilder, final Wfs wfs,
       final GWTAtomicInteger counter) {
-    GWT.log("Center: " + map.getView().getCenter());
     if (map.getView().getZoom() < MIN_WFS_ZOOM) {
       vectorSource.clear(true);
       return;
@@ -761,9 +774,7 @@ public final class MapUtil {
         getFeaturesOptions.setFilter(filter);
         final Node wfsNode = wfs.writeGetFeature(getFeaturesOptions);
         requestBuilder.setRequestData(new XMLSerializer().serializeToString(wfsNode));
-        GWT.log("Got " + numberOfFeatures + " features.");
         for (int i = 0; i < Math.min(numberOfFeatures, MAX_DRAW_FEATURES); i += MAX_FEATURE_BATCH) {
-          GWT.log("Getting: " + i + " > " + (i + MAX_FEATURE_BATCH));
           getFeatures(map, getFeaturesOptions, vectorSource, epsg, requestBuilder, wfs, counter, latest, i, MAX_FEATURE_BATCH);
         }
       }
@@ -869,7 +880,7 @@ public final class MapUtil {
 
   private static Style getBAGHighlightStyle() {
     final FillOptions fillOptions = OLFactory.createOptions();
-    fillOptions.setColor(new Color(255, 255, 255, 0.5f));
+    fillOptions.setColor(new Color(255, 255, 255, 0.9f));
 
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(225, 113, 13, 1f));
@@ -909,11 +920,11 @@ public final class MapUtil {
     return wrap(wmsLayer, info);
   }
 
-  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg) {
+  public static IsLayer<Layer> preparePhotoLayer(final Map map, final Projection projection, final EPSG epsg) {
     MapUtil.map = map;
     MapUtil.epsg = epsg;
     final WmtsOptions wmtsOptions = OLFactory.createOptions();
-    // https://geodata.nationaalgeoregister.nl/tiles/service/wmts?request=GetCapabilities&service=WMTS
+    // wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/tiles/service/wmts");
     wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts");
     wmtsOptions.setLayer("Actueel_ortho25");
     wmtsOptions.setFormat("image/jpeg");
@@ -933,6 +944,34 @@ public final class MapUtil {
 
     final LayerInfo info = new LayerInfo();
     info.setTitle("Actueel_ortho25");
+
+    return wrap(wmtsLayer, info);
+  }
+
+  public static IsLayer<Layer> prepareBaseLayer(final Map map, final Projection projection, final EPSG epsg) {
+    MapUtil.map = map;
+    MapUtil.epsg = epsg;
+    final WmtsOptions wmtsOptions = OLFactory.createOptions();
+    wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/tiles/service/wmts");
+    // wmtsOptions.setUrl("https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts");
+    wmtsOptions.setLayer("brtachtergrondkaartgrijs");
+    wmtsOptions.setFormat("image/png8");
+    wmtsOptions.setMatrixSet(epsg.getEpsgCode());
+    wmtsOptions.setStyle("default");
+    wmtsOptions.setProjection(projection);
+    wmtsOptions.setWrapX(true);
+    wmtsOptions.setTileGrid(createWmtsTileGrid(projection));
+
+    final Wmts wmtsSource = new Wmts(wmtsOptions);
+
+    final LayerOptions wmtsLayerOptions = OLFactory.createOptions();
+    wmtsLayerOptions.setSource(wmtsSource);
+
+    final Tile wmtsLayer = new Tile(wmtsLayerOptions);
+    wmtsLayer.setOpacity(1);
+
+    final LayerInfo info = new LayerInfo();
+    info.setTitle("brtachtergrondkaartgrijs");
 
     return wrap(wmtsLayer, info);
   }
@@ -1009,6 +1048,10 @@ public final class MapUtil {
   }
 
   public static void showIsoLines() {
-    showIsoLines = true;
+    GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER_SELECTIE_RD.geojson", f -> addIsoLayer("ISO_WEGTRAM", f, "WEGTRAM_LDEN"));
+  }
+
+  public static void hideIsoLines() {
+    eventBus.fireEvent(new LayerRemovedCommand(isoLayer));
   }
 }

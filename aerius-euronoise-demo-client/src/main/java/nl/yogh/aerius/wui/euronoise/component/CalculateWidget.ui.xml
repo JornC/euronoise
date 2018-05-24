@@ -75,7 +75,7 @@
     </g:FlowPanel>
     <g:FlowPanel styleName="{style.completePanel}" ui:field="completePanel">
       <g:Label text="Calculation complete!" styleName="{style.progress}" />
-      <g:Button text="Close" styleName="{style.calculate}" ui:field="close" />
+      <g:Button text="View sensitive areas" styleName="{style.calculate}" ui:field="close" />
     </g:FlowPanel>
   </g:FlowPanel>
 </ui:UiBinder>

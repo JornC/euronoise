@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
 import nl.yogh.aerius.wui.euronoise.event.CalculateInitEvent;
+import nl.yogh.aerius.wui.euronoise.event.DisplayResultsEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 
 public class CalculateWidget extends EventComposite {
@@ -58,7 +59,8 @@ public class CalculateWidget extends EventComposite {
   }
 
   @UiHandler("close")
-  public void onCloseClick(ClickEvent e) {
+  public void onCloseClick(final ClickEvent e) {
     CalculateWidget.this.getElement().getStyle().setHeight(0, Unit.PX);
+    eventBus.fireEvent(new DisplayResultsEvent());
   }
 }

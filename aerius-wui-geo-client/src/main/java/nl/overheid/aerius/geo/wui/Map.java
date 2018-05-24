@@ -25,4 +25,6 @@ public interface Map extends IsWidget, HasEventBus, RequiresResize {
   void attach();
 
   void registerEventCohort(HasEventBus eventBus);
+
+  void switchToBaseLayer();
 }

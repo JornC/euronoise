@@ -25,7 +25,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import nl.overheid.aerius.geo.command.LayerAddedCommand;
 import nl.overheid.aerius.geo.event.MapEventBus;
+import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.gwt.wui.widget.HasEventBus;
 
 public class OpenLayers3Map extends Composite implements Map {
@@ -89,5 +91,10 @@ public class OpenLayers3Map extends Composite implements Map {
   @Override
   public void onResize() {
     map.resize();
+  }
+
+  @Override
+  public void switchToBaseLayer() {
+    map.switchToGrayscaleLayer();
   }
 }

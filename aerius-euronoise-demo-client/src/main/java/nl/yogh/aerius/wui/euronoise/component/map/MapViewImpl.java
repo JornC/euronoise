@@ -27,11 +27,14 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import nl.overheid.aerius.geo.command.LayerAddedCommand;
 import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
+import nl.yogh.aerius.wui.euronoise.event.CalculateInitEvent;
 import nl.yogh.aerius.wui.euronoise.event.ClearTabSelectionEvent;
+import nl.yogh.aerius.wui.euronoise.event.DisplayResultsEvent;
 import nl.yogh.aerius.wui.euronoise.event.MeasureSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.ResultValueSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
@@ -108,13 +111,24 @@ public class MapViewImpl extends EventComposite implements MapView {
   }
 
   @EventHandler
+  public void onCalculationInitEvent(final CalculateInitEvent e) {
+    map.switchToBaseLayer();
+  }
+
+  @EventHandler
   public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
     MapUtil.setInteractionEnabled(true);
     MapUtil.hideInfrastructureLayers();
-    MapUtil.setResultValue("");
     MapUtil.showIsoLines();
 
     // MapUtil.displayMarkers();
+  }
+
+  @EventHandler
+  public void showResultsEvent(final DisplayResultsEvent e) {
+    MapUtil.setResultValue("");
+
+    MapUtil.hideIsoLines();
   }
 
   @EventHandler

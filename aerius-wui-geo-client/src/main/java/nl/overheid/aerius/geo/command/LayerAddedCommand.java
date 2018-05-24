@@ -21,8 +21,23 @@ import nl.overheid.aerius.geo.event.LayerAddedEvent;
 import nl.overheid.aerius.geo.event.LayerChangeEvent.CHANGE;
 
 public class LayerAddedCommand extends LayerChangeCommand<LayerAddedEvent> {
+  private boolean base;
+
   public LayerAddedCommand(final IsLayer<?> layer) {
     super(layer, CHANGE.ADDED);
+  }
+
+  public LayerAddedCommand(final IsLayer<?> layer, final boolean base) {
+    this(layer);
+    this.base = base;
+  }
+
+  public boolean isBase() {
+    return base;
+  }
+
+  public void setBase(final boolean base) {
+    this.base = base;
   }
 
   @Override
