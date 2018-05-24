@@ -5,9 +5,7 @@
   <ui:with field='res' type='nl.yogh.aerius.wui.resources.R.ApplicationResource' />
   <ui:style>
     .panel {
-    height: 40px;
-    }
-    .distribution {
+    height: 20px;
     }
     .distribution > * {
     line-height: 40px;

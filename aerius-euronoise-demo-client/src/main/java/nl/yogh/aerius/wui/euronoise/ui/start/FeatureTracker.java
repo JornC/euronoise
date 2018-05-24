@@ -75,7 +75,7 @@ public class FeatureTracker extends EventComposite {
       final Label lbl = new Label(segment.getName());
       lbl.getElement().getStyle().setTextAlign(TextAlign.CENTER);
       lbl.getElement().getStyle().setWidth((segment.getValue() / sum) * 100, Unit.PCT);
-      lbl.getElement().getStyle().setBackgroundColor(segment.getColor());
+      lbl.getElement().getStyle().setProperty("borderBottom", "8px solid " + segment.getColor());
       lbl.setTitle(segment.getName() + ": " + formatFixed(segment.getValue()) + " Lden");
 
       distributionPanel.add(lbl);
