@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
 import nl.yogh.aerius.wui.domain.RoadEmission;
+import nl.yogh.aerius.wui.euronoise.event.ClearTabSelectionEvent;
 import nl.yogh.aerius.wui.euronoise.event.ResultValueSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
 import nl.yogh.aerius.wui.euronoise.event.ShowIndustryEvent;
@@ -69,35 +70,59 @@ public class StartViewImpl extends EventComposite implements StartView {
     industryButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceIndustry().getSafeUri().asString() + ")");
     airTrafficButton.getElement().getStyle().setProperty("WebkitMaskImage", "url(" + R.images().sourceAirTraffic().getSafeUri().asString() + ")");
 
-    selectRoads();
-
     roadsData.addValueChangeHandler(e -> setCompensationMeasures(e.getValue()));
   }
 
   private void setCompensationMeasures(final RoadEmission value) {
     compensationPanel.setVisible(value != null);
 
-    eventBus.fireEvent(new RoadHighlightEvent(value != null ? value.getName() : ""));
-    eventBus.fireEvent(new ResultValueSelectedEvent(value != null && value.getName().equals("OWN") ? "OWN" : "A10_zonder"));
+    eventBus.fireEvent(new RoadHighlightEvent(value != null ? value.getName() : null));
 
     compensationPanel.reset();
   }
 
   @UiHandler("rails")
   public void onRailsClick(final ClickEvent e) {
-    contentSwitchPanel.showWidget(0);
-    eventBus.fireEvent(new ResultValueSelectedEvent("Railverk"));
-    select(rails);
-    
-    eventBus.fireEvent(new ShowRailsEvent());
+    if (isSelected(rails)) {
+      unselect();
+      return;
+    }
+
+    selectRails();
   }
 
   @UiHandler("industry")
   public void onIndustryClick(final ClickEvent e) {
-    contentSwitchPanel.showWidget(2);
-    eventBus.fireEvent(new ResultValueSelectedEvent("Industrie"));
-    select(industry);
-    eventBus.fireEvent(new ShowIndustryEvent());
+    if (isSelected(industry)) {
+      unselect();
+      return;
+    }
+
+    selectIndustry();
+  }
+
+  @UiHandler("roads")
+  public void onRoadsClick(final ClickEvent e) {
+    if (isSelected(roads)) {
+      unselect();
+      return;
+    }
+
+    selectRoads();
+  }
+
+  private boolean isSelected(final FocusPanel elem) {
+    return elem == selected;
+  }
+
+  private void unselect() {
+    if (selected != null) {
+      selected.removeStyleName(style.selected());
+    }
+
+    this.selected = null;
+
+    eventBus.fireEvent(new ClearTabSelectionEvent());
   }
 
   private void select(final Panel selection) {
@@ -109,17 +134,26 @@ public class StartViewImpl extends EventComposite implements StartView {
     selection.addStyleName(style.selected());
   }
 
-  @UiHandler("roads")
-  public void onRoadsClick(final ClickEvent e) {
-    selectRoads();
-    eventBus.fireEvent(new ResultValueSelectedEvent("A10_zonder"));
-    eventBus.fireEvent(new ShowRoadsEvent());
-    compensationPanel.reset();
+  private void selectRails() {
+    contentSwitchPanel.showWidget(0);
+    eventBus.fireEvent(new ResultValueSelectedEvent("Railverk"));
+    select(rails);
+    eventBus.fireEvent(new ShowRailsEvent());
+  }
+
+  private void selectIndustry() {
+    contentSwitchPanel.showWidget(2);
+    eventBus.fireEvent(new ResultValueSelectedEvent("Industrie"));
+    select(industry);
+    eventBus.fireEvent(new ShowIndustryEvent());
   }
 
   private void selectRoads() {
     contentSwitchPanel.showWidget(1);
     select(roads);
+    eventBus.fireEvent(new ResultValueSelectedEvent("Road"));
+    eventBus.fireEvent(new ShowRoadsEvent());
+    compensationPanel.reset();
   }
 
   @Override
@@ -128,8 +162,6 @@ public class StartViewImpl extends EventComposite implements StartView {
   @EventHandler
   public void onFeatureSelectionEvent(final SelectFeatureEvent e) {
     switchPanel.showWidget(0);
-
-    Scheduler.get().scheduleDeferred(() -> eventBus.fireEvent(new ShowRoadsEvent()));
   }
 
   @Override

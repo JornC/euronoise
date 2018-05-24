@@ -44,8 +44,8 @@ public class RoadsDataTable extends EventComposite implements HasValueChangeHand
   }
 
   private void voodoo() {
-    final RoadEmission em1 = new RoadEmission("A10", 100);
-    final RoadEmission em2 = new RoadEmission("OWN", 80);
+    final RoadEmission em1 = new RoadEmission("A10", 70);
+    final RoadEmission em2 = new RoadEmission("OWN", 68);
 
     final ArrayList<RoadEmission> lst = new ArrayList<>();
     lst.add(em1);

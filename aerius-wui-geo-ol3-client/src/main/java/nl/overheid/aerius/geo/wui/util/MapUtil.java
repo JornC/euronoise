@@ -18,6 +18,9 @@ package nl.overheid.aerius.geo.wui.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 import com.github.desjardins.elemental.XMLSerializer;
 import com.google.gwt.core.shared.GWT;
@@ -34,9 +37,7 @@ import elemental2.dom.Node;
 import nl.overheid.aerius.geo.BBox;
 import nl.overheid.aerius.geo.command.InfoLocationChangeCommand;
 import nl.overheid.aerius.geo.command.LayerAddedCommand;
-import nl.overheid.aerius.geo.command.LayerHiddenCommand;
 import nl.overheid.aerius.geo.command.LayerRemovedCommand;
-import nl.overheid.aerius.geo.command.LayerVisibleCommand;
 import nl.overheid.aerius.geo.domain.IsLayer;
 import nl.overheid.aerius.geo.domain.LayerInfo;
 import nl.overheid.aerius.geo.domain.Point;
@@ -119,6 +120,7 @@ public final class MapUtil {
   private static final String[] colors = new String[] { "#ffffe0", "#ffd59b", "#ffa474", "#f47461", "#db4551", "#b81b34", "#8b0000" };
   private static Vector resultLayerSource;
   private static String resultValue;
+  private static boolean interactionEnabled;
 
   private MapUtil() {}
 
@@ -270,6 +272,9 @@ public final class MapUtil {
     GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
     GeoJsonRetrievalUtil.getGeoJson("res/json/schermen.geojson", f -> addInfrastructureLayer("schermen", f, getSchermenStyle()));
     GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getSpoorbaanStyle()));
+    // GeoJsonRetrievalUtil.getGeoJson("res/json/GELUID_VERKEER.geojson", f -> addInfrastructureLayer("GELUID_VERKEER", f, getBAGStyle()));
+
+    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing_filtered.geojson", f -> addHighlightLayer("buildings_filtered", f));
   }
 
   public static void hideInfrastructureLayers() {
@@ -278,22 +283,35 @@ public final class MapUtil {
     }
   }
 
-  public static void showInfrastructureLayers(String name) {
+  public static void showInfrastructureLayers(final String name) {
     hideInfrastructureLayers();
 
+    GWT.log("Showing infrastructure: " + name);
+
     switch (name) {
-    case "Roads":
+    case "Road":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
+    case "A10_Noise barrier":
     case "A10":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       break;
+    case "OWN_Noise barrier":
     case "OWN":
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
       break;
     case "Rail":
       GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getHighlightSpoorbaanStyle()));
+      break;
+    case "Industry":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
+      break;
+    case "A10_Road surface ABC":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
+      break;
+    case "OWN_Road surface ABC":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
       break;
     default:
 
@@ -329,11 +347,10 @@ public final class MapUtil {
 
     final LayerInfo info = new LayerInfo();
     info.setTitle(name);
+    lyrOptions.setZIndex(0);
 
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
-
-    GeoJsonRetrievalUtil.getGeoJson("res/json/bebouwing_filtered.geojson", f -> addHighlightLayer("buildings_filtered", f));
   }
 
   private static String getProperGradientColor(final double decibels) {
@@ -356,9 +373,8 @@ public final class MapUtil {
     layer.setStyleFunction(object -> {
       final Style bagStyle = getInteractiveBAGStyle();
 
-      final Object str = object.get(resultValue);
-      if (str != null) {
-        final double decibels = (Double) str;
+      final Double decibels = determineDecibels(object, resultValue);
+      if (decibels != null) {
         final String color = getProperGradientColor(decibels);
         final Color colorFromString = Color.getColorFromString(color);
         bagStyle.getFill().setColor(colorFromString);
@@ -367,22 +383,33 @@ public final class MapUtil {
       return new Style[] { bagStyle };
     });
 
+    overlayLayer.setZIndex(1001);
+    layer.setZIndex(1000);
     resultLayerSource.addFeatures(features);
 
     final FeatureAtPixelOptions featureOptions = OLFactory.createOptions();
     featureOptions.setLayerFilter(v -> v.equals(layer));
 
     map.addPointerMoveListener(e -> {
+      if (!isInteractionEnabled()) {
+        return;
+      }
+
       final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f, featureOptions);
 
       if (feature == null) {
         nothing(map, overlaySource);
       } else {
+        GWT.log(feature.getId());
         highlightFeature(map, overlaySource, feature);
       }
     });
 
     map.addClickListener(e -> {
+      if (!isInteractionEnabled()) {
+        return;
+      }
+
       final Feature feature = map.forEachFeatureAtPixel(e.getPixel(), f -> f, featureOptions);
 
       if (feature != null) {
@@ -398,6 +425,58 @@ public final class MapUtil {
 
     final OL3Layer overlyr = wrap(overlayLayer, info);
     eventBus.fireEvent(new LayerAddedCommand(overlyr));
+  }
+
+  private static Double determineDecibels(final Feature object, final String resultValue) {
+    Double decibels = null;
+
+    GWT.log("Showing decibels for " + resultValue);
+
+    switch (resultValue) {
+    case "A10_zonder":
+    case "A10_metMa":
+    case "OWN":
+    case "Railverk":
+    case "Industrie":
+      decibels = object.get(resultValue);
+      break;
+    case "Road":
+      decibels = sumDecibels(object, "A10_zonder", "OWN");
+      break;
+    case "":
+      decibels = sumDecibels(object, "A10_zonder", "OWN", "Railverk", "Industrie");
+      break;
+    }
+
+    return decibels;
+  }
+
+  private static Double sumDecibels(final Feature object, final String... types) {
+    return sumDecibels(Stream.of(types).map(object::get).mapToDouble(v -> (Double) v).toArray());
+  }
+
+  private static Style getABCHwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
+    strokeOptions.setWidth(10);
+    strokeOptions.setLineDashOffset(1);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
+  }
+
+  private static Style getABCOwnStyle() {
+    final StrokeOptions strokeOptions = OLFactory.createOptions();
+    strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
+    strokeOptions.setWidth(10);
+    strokeOptions.setLineDashOffset(1);
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setStroke(new Stroke(strokeOptions));
+
+    return new Style(options);
   }
 
   private static Style getHighlightedHwnStyle() {
@@ -478,12 +557,16 @@ public final class MapUtil {
   }
 
   private static Style getPuntBronStyle() {
+    final FillOptions fillOptions = OLFactory.createOptions();
+    fillOptions.setColor(new Color(255, 255, 255, 0.5f));
+
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(204, 0, 52, 1f));
     strokeOptions.setWidth(4);
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
+    options.setFill(new Fill(fillOptions));
 
     return new Style(options);
   }
@@ -502,6 +585,9 @@ public final class MapUtil {
 
     final OL3Layer lyr = wrap(layer, info);
     eventBus.fireEvent(new LayerAddedCommand(lyr));
+
+    GWT.log("Features: " + f.length);
+    GWT.log("Adding layerrr");
 
     infrastructure.add(lyr);
   }
@@ -796,5 +882,17 @@ public final class MapUtil {
   public static void setResultValue(final String resultValue) {
     MapUtil.resultValue = resultValue;
     resultLayerSource.refresh();
+  }
+
+  private static double sumDecibels(final double... decs) {
+    return 10 * Math.log10(DoubleStream.of(decs).map(v -> Math.pow(10, v / 10)).sum());
+  }
+
+  public static boolean isInteractionEnabled() {
+    return interactionEnabled;
+  }
+
+  public static void setInteractionEnabled(final boolean interactionEnabled) {
+    MapUtil.interactionEnabled = interactionEnabled;
   }
 }

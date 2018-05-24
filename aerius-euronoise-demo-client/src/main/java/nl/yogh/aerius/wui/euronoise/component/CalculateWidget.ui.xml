@@ -66,7 +66,7 @@
   </ui:style>
   <g:FlowPanel styleName="{style.panel}">
     <g:FlowPanel styleName="{style.calculatePanel}" ui:field="infoPanel">
-      <g:Label text="Your scenario 'Westport' with two situations was successfully uploaded." styleName="{style.text}" />
+      <g:Label text="Your scenario 'Westport' was successfully uploaded." styleName="{style.text}" />
       <g:Button text="Calculate" styleName="{style.calculate}" ui:field="calculate" />
     </g:FlowPanel>
     <g:FlowPanel styleName="{style.progressPanel} {res.css.flex} {res.css.alignCenter}" ui:field="progressPanel">

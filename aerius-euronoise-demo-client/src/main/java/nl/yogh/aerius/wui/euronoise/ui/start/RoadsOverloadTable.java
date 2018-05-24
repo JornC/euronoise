@@ -44,14 +44,12 @@ public class RoadsOverloadTable extends EventComposite implements HasValueChange
   }
 
   private void voodoo() {
-    final RoadOverload em1 = new RoadOverload("Places exceeding GPP", 5);
-    final RoadOverload em2 = new RoadOverload("Highest overload", 200);
-    final RoadOverload em3 = new RoadOverload("Penalty points", 100);
+    final RoadOverload em1 = new RoadOverload("Places exceeding GPP", 15);
+    final RoadOverload em2 = new RoadOverload("Highest exceedance", 72);
 
     final ArrayList<RoadOverload> lst = new ArrayList<>();
     lst.add(em1);
     lst.add(em2);
-    lst.add(em3);
 
     divTable.setRowData(lst);
   }

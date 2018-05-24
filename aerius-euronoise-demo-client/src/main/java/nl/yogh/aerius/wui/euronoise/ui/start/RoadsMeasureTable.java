@@ -46,8 +46,8 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
   }
 
   private void voodoo() {
-    final RoadMeasure em1 = new RoadMeasure("Road surface ABC", -50);
-    final RoadMeasure em2 = new RoadMeasure("Noise barrier", -90);
+    final RoadMeasure em1 = new RoadMeasure("Road surface ABC", -4);
+    final RoadMeasure em2 = new RoadMeasure("Noise barrier", -6);
 
     final ArrayList<RoadMeasure> lst = new ArrayList<>();
     lst.add(em1);

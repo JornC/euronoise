@@ -94,7 +94,7 @@
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {style.panel}">
     <w:SwitchPanel ui:field="switchPanel" styleName="{res.css.flex}">
       <g:FlowPanel styleName="{style.actualContent} {res.css.grow}">
-        <g:Label text="Noise load sources at this location" styleName="{style.text}" />
+        <g:Label text="Noise emission sources at this location" styleName="{style.text}" />
         <g:FlowPanel styleName="{res.css.flex} {style.menu}">
           <g:FocusPanel ui:field="rails" styleName="{style.btn}">
             <g:FlowPanel styleName="{style.item} {res.css.flex} {res.css.columns} {res.css.alignCenter}">

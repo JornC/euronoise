@@ -31,6 +31,7 @@ import nl.overheid.aerius.geo.event.MapEventBus;
 import nl.overheid.aerius.geo.wui.Map;
 import nl.overheid.aerius.geo.wui.util.MapUtil;
 import nl.yogh.aerius.wui.euronoise.event.CalculateCompleteEvent;
+import nl.yogh.aerius.wui.euronoise.event.ClearTabSelectionEvent;
 import nl.yogh.aerius.wui.euronoise.event.MeasureSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.ResultValueSelectedEvent;
 import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
@@ -53,6 +54,10 @@ public class MapViewImpl extends EventComposite implements MapView {
   @UiField(provided = true) Widget mapPanel;
 
   private boolean loadMap;
+
+  private String tabSelection;
+
+  private String vanillaRoad;
 
   @Inject
   public MapViewImpl(final Map map) {
@@ -103,34 +108,62 @@ public class MapViewImpl extends EventComposite implements MapView {
 
   @EventHandler
   public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
+    MapUtil.setInteractionEnabled(true);
     MapUtil.hideInfrastructureLayers();
+    MapUtil.setResultValue("");
 
     // MapUtil.displayMarkers();
   }
-  
+
   @EventHandler
-  public void onSelectRails(ShowRailsEvent e) {
+  public void onSelectRails(final ShowRailsEvent e) {
     MapUtil.showInfrastructureLayers("Rail");
+    tabSelection = "Rail";
   }
-  
+
   @EventHandler
-  public void onSelectIndustry(ShowIndustryEvent e) {
+  public void onSelectIndustry(final ShowIndustryEvent e) {
     MapUtil.showInfrastructureLayers("");
+    tabSelection = "Industry";
   }
-  
+
   @EventHandler
-  public void onSelectRoads(ShowRoadsEvent e) {
-    MapUtil.showInfrastructureLayers("Roads");
+  public void onSelectRoads(final ShowRoadsEvent e) {
+    showGeneralizedRoad();
+    tabSelection = "Road";
+  }
+
+  public void showGeneralizedRoad() {
+    MapUtil.showInfrastructureLayers("Road");
+    MapUtil.setResultValue("Road");
+  }
+
+  @EventHandler
+  public void onClearTabSelectionEvent(final ClearTabSelectionEvent e) {
+    MapUtil.setResultValue("");
+    MapUtil.hideInfrastructureLayers();
   }
 
   @EventHandler
   public void onSelectRoad(final RoadHighlightEvent e) {
-    MapUtil.showInfrastructureLayers(e.getValue());
+    if (e.getValue() == null) {
+      showGeneralizedRoad();
+    } else {
+      MapUtil.showInfrastructureLayers(e.getValue());
+      vanillaRoad = e.getValue().equals("OWN") ? "OWN" : "A10";
+      eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals("OWN") ? "OWN" : "A10_zonder"));
+    }
   }
 
   @EventHandler
   public void onMeasureSelected(final MeasureSelectedEvent e) {
     MapUtil.setResultValue(e.getValue().isEmpty() ? "A10_zonder" : "A10_metMa");
+
+    if (!e.getValue().isEmpty()) {
+      MapUtil.showInfrastructureLayers(vanillaRoad + "_" + e.getValue().iterator().next().getName());
+    } else {
+      MapUtil.showInfrastructureLayers(vanillaRoad);
+    }
   }
 
   @EventHandler

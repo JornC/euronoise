@@ -37,7 +37,7 @@
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {res.css.columns}">
     <g:FlowPanel styleName="{style.tabPanel} {res.css.flex} {res.css.grow}">
-      <g:Label text="Overload" styleName="{style.tab} {style.leftTab}" ui:field="leftTab" />
+      <g:Label text="Exceedance" styleName="{style.tab} {style.leftTab}" ui:field="leftTab" />
       <g:Label text="Compensation" styleName="{style.tab}" ui:field="rightTab" />
     </g:FlowPanel>
     <w:SwitchPanel ui:field="switchPanel">

@@ -7,7 +7,8 @@
     .name {
 
     }
-    .header {
+    .footer {
+    border-top: 2px solid #ff7800c4;
     padding: 10px;
     }
     .value {
@@ -19,7 +20,8 @@
     }
     .row {
     padding: 10px;
-    transition: all 0.15s
+    transition: all
+    0.15s
     ease-out;
     cursor: pointer;
     user-select: none;
@@ -38,18 +40,18 @@
     }
   </ui:style>
   <wt:SimpleInteractiveClickDivTable ui:field="divTable" rowStyle="{style.row} {res.css.flex}" selectedStyle="{style.selected}">
-    <wt:header>
-      <g:FlowPanel styleName="{res.css.flex} {style.header}">
-        <g:Label styleName="{res.css.grow}" text="Penalty" />
-        <g:Label styleName="{res.css.grow} {style.unit}" text="Effect" />
-      </g:FlowPanel>
-    </wt:header>
     <wt:column>
       <wt:NameColumn cellStyle="{style.name} {res.css.grow}" />
     </wt:column>
     <wt:column>
       <wt:TextColumn ui:field="valueColumn" cellStyle="{style.value}" />
     </wt:column>
+    <wt:footer>
+      <g:FlowPanel styleName="{res.css.flex} {style.footer}">
+        <g:Label styleName="{res.css.grow}" text="Compensation points" />
+        <g:Label styleName="{res.css.grow} {style.unit}" text="105" />
+      </g:FlowPanel>
+    </wt:footer>
   </wt:SimpleInteractiveClickDivTable>
 </ui:UiBinder>
  
