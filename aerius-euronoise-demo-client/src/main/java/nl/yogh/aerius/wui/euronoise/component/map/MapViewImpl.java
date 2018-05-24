@@ -38,6 +38,7 @@ import nl.yogh.aerius.wui.euronoise.event.RoadHighlightEvent;
 import nl.yogh.aerius.wui.euronoise.event.ShowIndustryEvent;
 import nl.yogh.aerius.wui.euronoise.event.ShowRailsEvent;
 import nl.yogh.aerius.wui.euronoise.event.ShowRoadsEvent;
+import nl.yogh.aerius.wui.euronoise.ui.start.RoadsDataTable;
 import nl.yogh.gwt.wui.widget.EventComposite;
 
 public class MapViewImpl extends EventComposite implements MapView {
@@ -151,7 +152,7 @@ public class MapViewImpl extends EventComposite implements MapView {
     } else {
       MapUtil.showInfrastructureLayers(e.getValue());
       vanillaRoad = e.getValue().equals("OWN") ? "OWN" : "A10";
-      eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals("OWN") ? "OWN" : "A10_zonder"));
+      eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10_zonder"));
     }
   }
 

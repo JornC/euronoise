@@ -18,6 +18,8 @@ import nl.yogh.gwt.wui.widget.table.SimpleInteractiveClickDivTable;
 import nl.yogh.gwt.wui.widget.table.TextColumn;
 
 public class RoadsDataTable extends EventComposite implements HasValueChangeHandlers<RoadEmission> {
+  public static final String OWN = "Other roads";
+
   private static final RoadsDataTableUiBinder UI_BINDER = GWT.create(RoadsDataTableUiBinder.class);
 
   interface RoadsDataTableUiBinder extends UiBinder<Widget, RoadsDataTable> {}
@@ -45,7 +47,7 @@ public class RoadsDataTable extends EventComposite implements HasValueChangeHand
 
   private void voodoo() {
     final RoadEmission em1 = new RoadEmission("A10", 70);
-    final RoadEmission em2 = new RoadEmission("OWN", 68);
+    final RoadEmission em2 = new RoadEmission(OWN, 68);
 
     final ArrayList<RoadEmission> lst = new ArrayList<>();
     lst.add(em1);
