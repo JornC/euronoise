@@ -117,17 +117,14 @@ public class MapViewImpl extends EventComposite implements MapView {
 
   @EventHandler
   public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
-    MapUtil.setInteractionEnabled(true);
     MapUtil.hideInfrastructureLayers();
     MapUtil.showIsoLines();
-
-    // MapUtil.displayMarkers();
   }
 
   @EventHandler
   public void showResultsEvent(final DisplayResultsEvent e) {
     MapUtil.setResultValue("");
-
+    MapUtil.setInteractionEnabled(true);
     MapUtil.hideIsoLines();
   }
 

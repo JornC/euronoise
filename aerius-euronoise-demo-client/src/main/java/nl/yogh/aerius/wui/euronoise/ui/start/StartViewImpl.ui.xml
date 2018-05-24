@@ -16,11 +16,10 @@
     }
     .text {
     padding: 10px;
-    margin: 88px 0px 20px;;
+    margin: 28px 0px 20px;;
     }
     .icon {
-    width:
-    32px;
+    width: 32px;
     height: 32px;
     background: black;
     transition: background 0.15s ease-out;
@@ -91,10 +90,14 @@
     .hip {
     margin: 10px;
     }
+    .distribution {
+    margin-top: 20px;
+    }
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {style.panel}">
     <w:SwitchPanel ui:field="switchPanel" styleName="{res.css.flex}">
       <g:FlowPanel styleName="{style.actualContent} {res.css.grow}">
+        <s:FeatureTracker ui:field="featureTracker" addStyleNames="{style.distribution}" />
         <g:Label text="Noise emission sources at this location" styleName="{style.text}" />
         <g:FlowPanel styleName="{res.css.flex} {style.menu}">
           <g:FocusPanel ui:field="rails" styleName="{style.btn}">

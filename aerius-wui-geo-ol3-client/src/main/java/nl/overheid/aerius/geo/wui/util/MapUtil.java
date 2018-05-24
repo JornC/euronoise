@@ -286,7 +286,7 @@ public final class MapUtil {
     lyrOptions.setSource(lyrSource);
     final ol.layer.Vector layer = new ol.layer.Vector(lyrOptions);
     layer.setStyleFunction(object -> {
-      final Style bagStyle = getBAGStyle();
+      final Style bagStyle = getISOStyle();
 
       final Integer decibels = Integer.parseInt(object.get("SELECTIE"));
       if (decibels != null) {
@@ -835,6 +835,18 @@ public final class MapUtil {
     final StyleOptions options = OLFactory.createOptions();
     options.setFill(new Fill(fillOptions));
     options.setStroke(new Stroke(strokeOptions));
+    options.setZIndex(100);
+
+    final Style style = new Style(options);
+
+    return style;
+  }
+
+  private static Style getISOStyle() {
+    final FillOptions fillOptions = OLFactory.createOptions();
+
+    final StyleOptions options = OLFactory.createOptions();
+    options.setFill(new Fill(fillOptions));
     options.setZIndex(100);
 
     final Style style = new Style(options);

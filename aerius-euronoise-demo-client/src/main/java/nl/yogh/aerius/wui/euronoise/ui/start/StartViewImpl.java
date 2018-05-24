@@ -41,6 +41,8 @@ public class StartViewImpl extends EventComposite implements StartView {
     String selected();
   }
 
+  @UiField FeatureTracker featureTracker;
+
   @UiField SwitchPanel switchPanel;
 
   @UiField FocusPanel roads;
@@ -154,6 +156,7 @@ public class StartViewImpl extends EventComposite implements StartView {
     select(roads);
     eventBus.fireEvent(new ResultValueSelectedEvent("Road"));
     eventBus.fireEvent(new ShowRoadsEvent());
+    roadsData.reset();
     compensationPanel.reset();
   }
 
@@ -167,7 +170,7 @@ public class StartViewImpl extends EventComposite implements StartView {
 
   @Override
   public void setEventBus(final EventBus eventBus) {
-    super.setEventBus(eventBus, compensationPanel);
+    super.setEventBus(eventBus, compensationPanel, featureTracker, roadsData);
 
     EVENT_BINDER.bindEventHandlers(this, eventBus);
   }
