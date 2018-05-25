@@ -10,9 +10,13 @@
     .header {
     padding: 10px;
     }
+    .footer {
+    border-top: 2px solid #e1710d;
+    padding: 10px;
+    }
     .value {
     text-align: right;
-    width: 100px;
+    width: 60px;
     }
     .unit {
     text-align: right;
@@ -41,7 +45,7 @@
     <wt:header>
       <g:FlowPanel styleName="{res.css.flex} {style.header}">
         <g:Label styleName="{res.css.grow}" text="Option" />
-        <g:Label styleName="{res.css.grow} {style.unit}" text="Effect" />
+        <g:Label styleName="{res.css.grow} {style.unit}" text="Points" />
       </g:FlowPanel>
     </wt:header>
     <wt:column>
@@ -50,6 +54,12 @@
     <wt:column>
       <wt:TextColumn ui:field="emissionColumn" cellStyle="{style.value}" />
     </wt:column>
+    <wt:footer>
+      <g:FlowPanel styleName="{res.css.flex} {style.footer}">
+        <g:Label styleName="{res.css.grow}" text="Total" />
+        <g:Label styleName="{res.css.grow} {style.unit}" ui:field="sumField" />
+      </g:FlowPanel>
+    </wt:footer>
   </wt:SimpleInteractiveClickDivTable>
 </ui:UiBinder>
  

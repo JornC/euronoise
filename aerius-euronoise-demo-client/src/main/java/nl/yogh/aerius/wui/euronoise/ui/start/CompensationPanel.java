@@ -65,7 +65,7 @@ public class CompensationPanel extends EventComposite {
   }
 
   @UiHandler("roadsMeasureTable")
-  public void onRoadsMeasureTable(final ValueChangeEvent<RoadMeasure> e) {
+  public void onRoadsMeasureTable(final ValueChangeEvent<Set<RoadMeasure>> e) {
     eventBus.fireEvent(new MeasureSelectedEvent(e.getValue()));
   }
 

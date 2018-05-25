@@ -56,6 +56,7 @@ import ol.MapBrowserEvent;
 import ol.MapOptions;
 import ol.OLFactory;
 import ol.OLUtil;
+import ol.Size;
 import ol.View;
 import ol.ViewOptions;
 import ol.color.Color;
@@ -178,8 +179,8 @@ public final class MapUtil {
   }
 
   public static void prepareMarkersLayer(final String markerNotAffected, final String markerAffected, final String markerSelected) {
-    markerUnaffectedLayer = prepareMarkersLayer("not-affected", markerNotAffected);
-    markerAffectedLayer = prepareMarkersLayer("affected", markerAffected);
+//    markerUnaffectedLayer = prepareMarkersLayer("not-affected", markerNotAffected);
+//    markerAffectedLayer = prepareMarkersLayer("affected", markerAffected);
     markerSelectedLayer = prepareMarkersLayer("selected", markerSelected);
   }
 
@@ -207,6 +208,32 @@ public final class MapUtil {
     markerUnaffectedLayer.setSource(vectorSource);
   }
 
+  public static void setSelectedMarker(Feature f) {
+    Extent extent = f.getGeometry().getExtent();
+
+    Point centroid = new Point(avg(extent.getUpperRightX(), extent.getLowerLeftX()), avg(extent.getUpperRightY(), extent.getLowerLeftY()));
+    GWT.log("Drawing marker: " + centroid);
+
+    // Create the marker
+    final Feature marker = createMarker(centroid);
+
+    // Push the features
+    final Collection<Feature> features = new Collection<Feature>();
+    features.push(marker);
+
+    // Create source
+    final VectorOptions vectorSourceOptions = OLFactory.createOptions();
+    vectorSourceOptions.setFeatures(features);
+    final Vector vectorSource = new Vector(vectorSourceOptions);
+
+    // Update layer with new source
+    markerSelectedLayer.setSource(vectorSource);
+  }
+
+  private static double avg(double a, double b) {
+    return (a + b) / 2;
+  }
+
   public static Feature createMarker(final Point value) {
     final Coordinate coordinate = OLFactory.createCoordinate(value.getX(), value.getY());
     final ol.geom.Point point = new ol.geom.Point(coordinate);
@@ -219,13 +246,16 @@ public final class MapUtil {
     // create style
     final StyleOptions styleOptions = new StyleOptions();
 
-    final IconOptions notAffectedIconOptions = new IconOptions();
-    notAffectedIconOptions.setSrc(src);
-    notAffectedIconOptions.setSnapToPixel(true);
-    notAffectedIconOptions.setAnchor(new double[] { 0.5, 1 });
+    final IconOptions iconOptions = new IconOptions();
+    iconOptions.setSrc(src);
+    iconOptions.setSnapToPixel(true);
+    iconOptions.setAnchor(new double[] { 0.5, 1 });
     // iconOptions.setImgSize(OLFactory.createSize(40, 20));
-    final Icon icon = new Icon(notAffectedIconOptions);
+    
+    final Icon icon = new Icon(iconOptions);
     styleOptions.setImage(icon);
+    styleOptions.setStroke(OLFactory.createStroke(OLFactory.createColor(214, 51, 39, 1), 2));
+    styleOptions.setFill(OLFactory.createFill(OLFactory.createColor(255, 255, 255, 0.4)));
 
     final Style style = new Style(styleOptions);
 
@@ -233,6 +263,7 @@ public final class MapUtil {
     vectorLayerOptions.setStyle(style);
 
     final ol.layer.Vector layer = new ol.layer.Vector(vectorLayerOptions);
+    layer.setZIndex(2000);
 
     final LayerInfo info = new LayerInfo();
     info.setTitle(name);
@@ -360,25 +391,37 @@ public final class MapUtil {
       GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));
       except(exceptions, "puntbronnen");
       break;
-    case "A10_Road surface ABC":
+    case "A10_surface":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-abc", f, getABCHwnStyle()));
-      except(exceptions, "HWN-highlight", "HWN-abc");
+      GeoJsonRetrievalUtil.getGeoJson("res/json/surface.geojson", f -> addRaisedInfrastructureLayer("HWN-surface", f, getRoadSurfaceStyle()));
+      except(exceptions, "HWN-highlight", "HWN-surface");
       break;
-    case "OWN_Road surface ABC":
+    case "OWN_surface":
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-abc", f, getABCOwnStyle()));
-      except(exceptions, "OWN-highlight", "OWN-abc");
+      GeoJsonRetrievalUtil.getGeoJson("res/json/surface.geojson", f -> addRaisedInfrastructureLayer("OWN-surface", f, getRoadSurfaceStyle()));
+      except(exceptions, "OWN-highlight", "OWN-surface");
       break;
-    case "A10_Noise barrier":
+    case "A10_barrier":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addRaisedInfrastructureLayer("HWN-barrier", f, getBarrierHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/barrier.geojson", f -> addRaisedInfrastructureLayer("HWN-barrier", f, getRoadBarrierStyle()));
       except(exceptions, "HWN-highlight", "HWN-barrier");
       break;
-    case "OWN_Noise barrier":
+    case "OWN_barrier":
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
-      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addRaisedInfrastructureLayer("OWN-barrier", f, getBarrierOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/barrier.geojson", f -> addRaisedInfrastructureLayer("OWN-barrier", f, getRoadBarrierStyle()));
       except(exceptions, "OWN-highlight", "OWN-barrier");
+      break;
+    case "A10_barrier_surface":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/barrier.geojson", f -> addRaisedInfrastructureLayer("HWN-barrier", f, getRoadBarrierStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/surface.geojson", f -> addRaisedInfrastructureLayer("HWN-surface", f, getRoadSurfaceStyle()));
+      except(exceptions, "HWN-highlight", "HWN-barrier", "HWN-surface");
+      break;
+    case "OWN_barrier_surface":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/barrier.geojson", f -> addRaisedInfrastructureLayer("OWN-barrier", f, getRoadBarrierStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/surface.geojson", f -> addRaisedInfrastructureLayer("OWN-surface", f, getRoadSurfaceStyle()));
+      except(exceptions, "OWN-highlight", "OWN-barrier", "OWN-surface");
       break;
     default:
 
@@ -435,7 +478,7 @@ public final class MapUtil {
 
   private static String getProperGradientColor(final double decibels) {
     return colors[Math.max(1, Math.min(colors.length, (int) Math.round((decibels - DECIBELS_MIN) / (DECIBELS_MAX - DECIBELS_MIN) * colors.length)))
-                  - 1];
+        - 1];
   }
 
   private static void addHighlightLayer(final String name, final Feature[] features) {
@@ -536,12 +579,12 @@ public final class MapUtil {
     return sumDecibels(Stream.of(types).map(object::get).mapToDouble(v -> (Double) v).toArray());
   }
 
-  private static Style getABCHwnStyle() {
+  private static Style getRoadSurfaceStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
-    strokeOptions.setWidth(4);
+    strokeOptions.setWidth(12);
     strokeOptions.setLineDashOffset(2);
-    strokeOptions.setLineDash(new int[] { 20, 20 });
+    strokeOptions.setLineDash(new int[] { 40, 10 });
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));
@@ -549,38 +592,12 @@ public final class MapUtil {
     return new Style(options);
   }
 
-  private static Style getABCOwnStyle() {
-    final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(29, 101, 0, 0.8f));
-    strokeOptions.setWidth(4);
-    strokeOptions.setLineDashOffset(2);
-    strokeOptions.setLineDash(new int[] { 20, 20 });
-
-    final StyleOptions options = OLFactory.createOptions();
-    options.setStroke(new Stroke(strokeOptions));
-
-    return new Style(options);
-  }
-
-  private static Style getBarrierHwnStyle() {
+  private static Style getRoadBarrierStyle() {
     final StrokeOptions strokeOptions = OLFactory.createOptions();
     strokeOptions.setColor(new Color(74, 155, 239, 0.8f));
-    strokeOptions.setWidth(4);
+    strokeOptions.setWidth(12);
     strokeOptions.setLineDashOffset(2);
-    strokeOptions.setLineDash(new int[] { 20, 20 });
-
-    final StyleOptions options = OLFactory.createOptions();
-    options.setStroke(new Stroke(strokeOptions));
-
-    return new Style(options);
-  }
-
-  private static Style getBarrierOwnStyle() {
-    final StrokeOptions strokeOptions = OLFactory.createOptions();
-    strokeOptions.setColor(new Color(225, 72, 13, 0.8f));
-    strokeOptions.setWidth(4);
-    strokeOptions.setLineDashOffset(2);
-    strokeOptions.setLineDash(new int[] { 20, 20 });
+    strokeOptions.setLineDash(new int[] { 40, 10 });
 
     final StyleOptions options = OLFactory.createOptions();
     options.setStroke(new Stroke(strokeOptions));

@@ -91,7 +91,7 @@
     margin: 10px;
     }
     .distribution {
-    margin-top: 20px;
+    margin-top: 25px;
     }
   </ui:style>
   <g:FlowPanel styleName="{res.css.flex} {res.css.grow} {style.panel}">

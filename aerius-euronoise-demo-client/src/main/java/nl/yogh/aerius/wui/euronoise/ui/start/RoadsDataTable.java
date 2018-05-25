@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.EventBus;
@@ -16,7 +17,6 @@ import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
-import nl.yogh.aerius.wui.domain.NoiseSegment;
 import nl.yogh.aerius.wui.domain.RoadEmission;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.table.SimpleInteractiveClickDivTable;
@@ -42,17 +42,23 @@ public class RoadsDataTable extends EventComposite implements HasValueChangeHand
     emissionColumn = new TextColumn<RoadEmission>() {
       @Override
       public String getValue(final RoadEmission object) {
-        return String.valueOf((int) Math.round(object.getEmission() * 100) / 100);
+        return getEmission(object);
       }
     };
 
     initWidget(UI_BINDER.createAndBindUi(this));
     divTable.setSingleSelectionModel();
+    divTable.setKeyProvider(v -> v.getName(), true);
+    divTable.setReplacementFunction((v, r) -> ((Label) r.getWidget(1)).setText(getEmission(v)));
     divTable.getSelectionModel().addSelectionChangeHandler(e -> {
       ValueChangeEvent.fire(RoadsDataTable.this, ((SingleSelectionModel<RoadEmission>) divTable.getSelectionModel()).getSelectedObject());
     });
 
     voodoo(70, 68);
+  }
+
+  private String getEmission(RoadEmission object) {
+    return String.valueOf((int) Math.round(object.getEmission() * 100) / 100);
   }
 
   @EventHandler

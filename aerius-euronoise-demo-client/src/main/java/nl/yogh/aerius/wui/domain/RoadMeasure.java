@@ -5,10 +5,12 @@ import com.google.gwt.user.client.ui.HasName;
 public class RoadMeasure implements HasName {
   private double emission;
   private String name;
+  private String type;
 
   public RoadMeasure() {}
 
-  public RoadMeasure(final String name, final double emission) {
+  public RoadMeasure(String type, final String name, final double emission) {
+    this.setType(type);
     this.name = name;
     this.emission = emission;
   }
@@ -29,6 +31,14 @@ public class RoadMeasure implements HasName {
 
   public void setEmission(final double emission) {
     this.emission = emission;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
 }
