@@ -18,6 +18,7 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import nl.overheid.aerius.geo.wui.util.SelectFeatureEvent;
 import nl.yogh.aerius.wui.domain.RoadEmission;
+import nl.yogh.aerius.wui.euronoise.event.MeasureSelectedEvent;
 import nl.yogh.gwt.wui.widget.EventComposite;
 import nl.yogh.gwt.wui.widget.table.SimpleInteractiveClickDivTable;
 import nl.yogh.gwt.wui.widget.table.TextColumn;
@@ -37,6 +38,10 @@ public class RoadsDataTable extends EventComposite implements HasValueChangeHand
   @UiField SimpleInteractiveClickDivTable<RoadEmission> divTable;
 
   @UiField(provided = true) TextColumn<RoadEmission> emissionColumn;
+
+  private boolean measureSelected;
+
+  private Feature selectedFeature;
 
   public RoadsDataTable() {
     emissionColumn = new TextColumn<RoadEmission>() {
@@ -63,12 +68,22 @@ public class RoadsDataTable extends EventComposite implements HasValueChangeHand
 
   @EventHandler
   public void onFeatureSelectEvent(final SelectFeatureEvent e) {
-    final Feature feature = e.getValue();
+    selectedFeature = e.getValue();
+    updateFeature(selectedFeature);
+  }
+  
+  private void updateFeature(Feature feature) {
 
-    final double a10Zonder = feature.get("A10_zonder");
+    final double a10Zonder = feature.get(measureSelected ? "A10_metMa" : "A10_zonder");
     final double own = feature.get("OWN");
 
     voodoo(a10Zonder, own);
+  }
+
+  @EventHandler
+  public void onMeasureSelectedEvent(MeasureSelectedEvent e) {
+    measureSelected = e.getValue() != null && !e.getValue().isEmpty();
+    updateFeature(selectedFeature);
   }
 
   private void voodoo(final double i, final double j) {

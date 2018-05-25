@@ -128,6 +128,7 @@ public class FeatureTracker extends EventComposite {
     for (int i = 0; i < distributionPanel.getWidgetCount(); i++) {
       NoiseSegment segment = set.get(i);
       distributionPanel.getWidget(i).getElement().getStyle().setWidth((segment.getValue() / sum) * 100, Unit.PCT);
+      distributionPanel.getWidget(i).setTitle(segment.getName() + ": " + formatFixed(segment.getValue()) + " Lden");
     }
   }
 
