@@ -370,6 +370,12 @@ public final class MapUtil {
     final List<String> exceptions = new ArrayList<>();
 
     switch (name) {
+    case "default":
+      GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
+      GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan-highlight", f, getHighlightSpoorbaanStyle()));
+      except(exceptions, "spoorbaan-highlight", "HWN-highlight", "OWN-highlight");
+      break;
     case "Road":
       GeoJsonRetrievalUtil.getGeoJson("res/json/HWN.geojson", f -> addInfrastructureLayer("HWN-highlight", f, getHighlightedHwnStyle()));
       GeoJsonRetrievalUtil.getGeoJson("res/json/OWN.geojson", f -> addInfrastructureLayer("OWN-highlight", f, getHighlightedOwnStyle()));
@@ -384,8 +390,8 @@ public final class MapUtil {
       except(exceptions, "OWN-highlight");
       break;
     case "Rail":
-      GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan", f, getHighlightSpoorbaanStyle()));
-      except(exceptions, "ISO_METRO", "spoorbaan");
+      GeoJsonRetrievalUtil.getGeoJson("res/json/spoorbaan.geojson", f -> addInfrastructureLayer("spoorbaan-highlight", f, getHighlightSpoorbaanStyle()));
+      except(exceptions, "ISO_METRO", "spoorbaan-highlight");
       break;
     case "Industry":
       GeoJsonRetrievalUtil.getGeoJson("res/json/puntbronnen.geojson", f -> addInfrastructureLayer("puntbronnen", f, getPuntBronStyle()));

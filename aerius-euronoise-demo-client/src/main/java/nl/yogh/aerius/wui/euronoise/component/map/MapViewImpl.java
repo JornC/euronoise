@@ -50,8 +50,6 @@ public class MapViewImpl extends EventComposite implements MapView {
   private static final MapViewImplUiBinder UI_BINDER = GWT.create(MapViewImplUiBinder.class);
 
   private static final String SELECTED_MARKER = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 55 82' width='29' height='44'><defs><style>.cls-1{fill:#fff;}.cls-2{fill:#e0700d;}</style></defs><title>Artboard 1</title><path class='cls-1' d='M14.25,2.15A12.79,12.79,0,0,0,1.18,15.23c0,4.29,2.06,7.48,4.24,10.85a43.48,43.48,0,0,1,5.73,12.75,3.2,3.2,0,0,0,6.2,0,43.48,43.48,0,0,1,5.73-12.75c2.18-3.37,4.24-6.56,4.24-10.85A12.79,12.79,0,0,0,14.25,2.15Z'/><path class='cls-1' d='M27.32,2.15C12.42,2.15,1.18,13.4,1.18,28.31c0,8.57,4.12,15,8.48,21.7a86,86,0,0,1,11.45,25.5,6.42,6.42,0,0,0,12.42,0A86.22,86.22,0,0,1,45,50c4.36-6.75,8.48-13.13,8.48-21.7C53.46,13.4,42.22,2.15,27.32,2.15Z'/><circle class='cls-1' cx='27.53' cy='28.24' r='14.96'/><path class='cls-2' d='M27.32,5.15c-13.19,0-23.14,10-23.14,23.16,0,7.68,3.71,13.42,8,20.07A89.4,89.4,0,0,1,24,74.75a3.41,3.41,0,0,0,6.6,0A89.4,89.4,0,0,1,42.46,48.38c4.3-6.65,8-12.39,8-20.07C50.46,15.11,40.51,5.15,27.32,5.15Zm0,36.34A13.15,13.15,0,1,1,40.46,28.35,13.14,13.14,0,0,1,27.32,41.49Z'/><circle cx='27.32' cy='28.35' r='6.44'/></svg>";
-  private static final String INFO_MARKER_SVG = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34' width='32' height='32'><title>an-location</title><path d='M17,3.64a8.39,8.39,0,0,0-8.57,8.58c0,2.84,1.37,5,3,7.43a33.2,33.2,0,0,1,4.38,9.77,1.26,1.26,0,0,0,2.45,0,33,33,0,0,1,4.38-9.77c1.59-2.46,3-4.59,3-7.43A8.38,8.38,0,0,0,17,3.64ZM17,17.1a4.87,4.87,0,1,1,4.87-4.87A4.87,4.87,0,0,1,17,17.1Z' fill='#d63327'/><circle cx='17' cy='12.23' r='2.39' fill='#d63327'/></svg>";
-
 
   interface MapViewImplUiBinder extends UiBinder<Widget, MapViewImpl> {}
 
@@ -129,7 +127,7 @@ public class MapViewImpl extends EventComposite implements MapView {
 
   @EventHandler
   public void onCalculateCompleteEvent(final CalculateCompleteEvent e) {
-    MapUtil.hideInfrastructureLayers();
+    MapUtil.showInfrastructureLayers("default");
     MapUtil.showIsoLines();
   }
 
@@ -166,7 +164,7 @@ public class MapViewImpl extends EventComposite implements MapView {
   @EventHandler
   public void onClearTabSelectionEvent(final ClearTabSelectionEvent e) {
     MapUtil.setResultValue("");
-    MapUtil.hideInfrastructureLayers();
+    MapUtil.showInfrastructureLayers("default");
   }
 
   @EventHandler
@@ -179,7 +177,7 @@ public class MapViewImpl extends EventComposite implements MapView {
       eventBus.fireEvent(new ResultValueSelectedEvent(e.getValue().equals(RoadsDataTable.OWN) ? "OWN" : "A10_zonder"));
     }
   }
-
+  
   @EventHandler
   public void onMeasureSelected(final MeasureSelectedEvent e) {
     MapUtil.setResultValue(e.getValue() == null || e.getValue().isEmpty() ? "A10_zonder" : "A10_metMa");
