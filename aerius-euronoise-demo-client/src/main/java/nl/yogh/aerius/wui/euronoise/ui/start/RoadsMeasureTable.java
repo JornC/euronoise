@@ -57,7 +57,6 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
     final RoadMeasure em2 = new RoadMeasure("barrier", "Noise Barrier (3m)", 133);
     final RoadMeasure em3 = new RoadMeasure("barrier", "Noise Barrier (4m)", 172);
     final RoadMeasure em4 = new RoadMeasure("barrier", "Noise Barrier (5m)", 212);
-    final RoadMeasure em5 = new RoadMeasure("surface", "Element Hardening", 30);
     final RoadMeasure em6 = new RoadMeasure("surface", "Road surface (ZOAB)", 40);
     final RoadMeasure em7 = new RoadMeasure("surface", "Road surface (ZOAB dual layer)", 240);
     final RoadMeasure em8 = new RoadMeasure("surface", "Road surface (thin layered)", 130);
@@ -67,7 +66,6 @@ public class RoadsMeasureTable extends EventComposite implements HasValueChangeH
     lst.add(em2);
     lst.add(em3);
     lst.add(em4);
-    lst.add(em5);
     lst.add(em6);
     lst.add(em7);
     lst.add(em8);
