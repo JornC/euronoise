@@ -25,9 +25,9 @@
   <entry-point class='nl.yogh.aerius.wui.Bootstrap' />
 
   <!-- Enable server site logging -->
-  <set-property name="gwt.logging.enabled" value="TRUE" />
+  <set-property name="gwt.logging.enabled" value="FALSE" />
   <set-property name="gwt.logging.logLevel" value="INFO" />
-  <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+  <set-property name="gwt.logging.consoleHandler" value="DISABLED" />
   <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
   <set-property name="compiler.stackMode" value="emulated" />
   <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
